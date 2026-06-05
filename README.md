@@ -1,8 +1,6 @@
 # Laravel Demo & Experimentation Playground
 
-This repository is a personal sandbox project created to learn, build, and test various unrelated features, AI integrations, and tools using Laravel 13, Vite, and PHP 8.3+. 
-
-Each module in this project stands on its own and represents a different experiment.
+A personal Laravel 13 playground containing unrelated sandbox experiments, featuring independent AI-driven modules (using Groq & Gemini fallbacks), browser-recorded speech-to-text oral exam evaluators, and local MCP server integrations.
 
 ---
 
@@ -15,22 +13,27 @@ An experiment in combining YouTube content scraping with LLM generation to draft
 * **What it does**: Takes a YouTube playlist URL, distributes the videos across a 4, 8, or 12-week course, grabs transcripts from YouTube, and uses AI (Groq/Gemini fallbacks) to write syllabus summaries. It then auto-generates 10-question MCQ quizzes and subjective homework tasks.
 * **Where to find it**: Access it at `/courses` (configured in `routes/web.php` via [CourseController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/CourseController.php)).
 
-### 2. Tweet Generator
+### 2. AI Viva Voce (Oral Exam Evaluator)
+An experiment in conversational speech-to-text academic assessments.
+* **What it does**: Conducts a multi-turn oral exam between an AI examiner and the student. Students record their verbal responses directly in the browser, which are transcribed using the **Groq Whisper API** and evaluated on concepts, technical delivery, and style to compile a final scorecard.
+* **Where to find it**: Access it from the Course Planner detail page under `/courses/{courseId}/viva` (configured in `routes/web.php` via [VivaController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/VivaController.php)).
+
+### 3. AI Tweet Generator
 A small integration testing quick prompt completions with the Groq API.
 * **What it does**: Generates a single tweet under 280 characters based on a custom topic and selected tone (casual, professional, humorous, or inspirational).
 * **Where to find it**: Access it at `/tweet-generator` (configured via [TweetGeneratorController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TweetGeneratorController.php)).
 
-### 3. Student & Daily Diary Evaluator
+### 4. Student & Daily Diary Evaluator
 A sample CRUD and journal-logging experiment.
 * **What it does**: Manages student records and tests daily journal/log evaluations (blockers, learnings, hours, skills) against academic guidelines by posting to an evaluation endpoint.
 * **Where to find it**: Access it at `/sample` (configured via [StudentController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/StudentController.php) and [AIController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/AIController.php)).
 
-### 4. Model Context Protocol (MCP) Server
+### 5. Model Context Protocol (MCP) Server
 An exploration of the Model Context Protocol to let AI agents execute actions locally.
 * **What it does**: Configures a local MCP server (`HelloServer`) using `laravel/mcp`.
 * **Where to find it**: Defined in the [ai.php](file:///c:/Users/Prathamesh/Herd/myapp/routes/ai.php) route file.
 
-### 5. Service Container SMS Service Test
+### 6. Service Container SMS Service Test
 * **What it does**: A simple route to test resolving and invoking the custom `SmsService` from the Laravel service container.
 * **Where to find it**: Access it at `/test-sms`.
 
@@ -39,8 +42,8 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
 ## 🛠️ Stack & Technologies Used
 
 * **Framework**: Laravel 13 (PHP ^8.3)
-* **Frontend**: Blade templates, TailwindCSS, Vite
-* **AI Orchestration**: Custom multi-model failover logic in [AIService](file:///c:/Users/Prathamesh/Herd/myapp/app/Support/AIService.php) calling Groq Cloud (Llama) and Google Gemini APIs.
+* **Frontend**: Blade templates, TailwindCSS, Vite, Browser Audio Recorder APIs
+* **AI Orchestration**: Custom multi-model failover logic in [AIService](file:///c:/Users/Prathamesh/Herd/myapp/app/Support/AIService.php) calling Groq Cloud (Llama & Whisper for Speech-to-Text) and Google Gemini APIs.
 * **Testing & Tools**: Pest PHP, Laravel Pail, Laravel Tinker, Laravel MCP.
 
 ---
