@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $title ?? 'Herd AI' }} — Workspace Hub</title>
+    <title>{{ $title ?? 'AI' }} — Workspace Hub</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,8 +177,8 @@
 <body>
     <header class="workspace-header">
         <a href="/" class="logo-group">
-            <div class="logo-icon">H</div>
-            <div class="logo-text">Herd<span>AI</span> Workspace</div>
+            <div class="logo-icon">AI</div>
+            <div class="logo-text"> Workspace</div>
         </a>
         <nav class="workspace-nav">
             <ul>
@@ -225,8 +225,8 @@
 
     <footer class="workspace-footer">
         <div class="footer-content">
-            <div class="footer-logo">Herd AI Workspace Hub</div>
-            <div class="footer-copy">© 2026 Herd AI Inc. Powered by Laravel & Advanced Large Language Models.</div>
+            <div class="footer-logo">AI Workspace Hub</div>
+            <div class="footer-copy">© 2026 AI Inc. Powered by Laravel & Advanced Large Language Models.</div>
             <div class="footer-links">
                 <a href="/">Dashboard</a>
                 <a href="/courses">Course Planner</a>

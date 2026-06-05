@@ -1,5 +1,5 @@
 <x-layout>
-    <x-slot:title>Unified Workspace Hub — Herd AI</x-slot>
+    <x-slot:title>AI Workspace Hub</x-slot>
 
     <!-- Premium Hero Section -->
     <div style="padding: 6rem 3rem; background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%); border-bottom: 1px solid var(--border); position: relative; overflow: hidden;">
@@ -18,7 +18,7 @@
             </h1>
             
             <p style="font-size: 1.25rem; max-width: 750px; margin-bottom: 3.5rem; color: var(--text-muted); font-weight: 500; line-height: 1.6;">
-                Welcome to your unified Herd AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, and students directory records.
+                Welcome to your unified AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, and students directory records.
             </p>
             
             <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">

@@ -135,6 +135,109 @@ class AIService
     }
 
     /**
+     * Transcribe voice audio using Groq Whisper API.
+     */
+    public function transcribeAudio($audioPath)
+    {
+        $apiKey = config('services.groq.api_key') ?? env('GROQ_API_KEY');
+        if (empty($apiKey)) {
+            throw new \Exception("Groq API key is missing. Please configure it in your .env file.");
+        }
+
+        if (!file_exists($audioPath)) {
+            throw new \Exception("Audio file not found: {$audioPath}");
+        }
+
+        try {
+            $res = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+            ])->asMultipart()->post('https://api.groq.com/openai/v1/audio/transcriptions', [
+                [
+                    'name' => 'file',
+                    'contents' => fopen($audioPath, 'r'),
+                    'filename' => basename($audioPath),
+                ],
+                [
+                    'name' => 'model',
+                    'contents' => 'whisper-large-v3-turbo',
+                ],
+                [
+                    'name' => 'response_format',
+                    'contents' => 'json',
+                ],
+            ]);
+
+            if ($res->successful()) {
+                $text = $res->json('text');
+                if ($text !== null) {
+                    return trim($text);
+                }
+            }
+
+            Log::error("Groq transcription API failed: " . $res->body());
+            throw new \Exception("Transcription failed: " . $res->status() . " " . $res->body());
+        } catch (\Exception $e) {
+            Log::error("Groq transcription exception: " . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Ask a single viva question based on syllabus context and chat history.
+     */
+    public function generateVivaQuestion($courseTitle, $aggregatedContent, $chatHistory)
+    {
+        $prompt = "Syllabus Context:\n{$aggregatedContent}\n\n";
+        if (!empty($chatHistory)) {
+            $prompt .= "Chat History so far:\n{$chatHistory}\n\n";
+            $prompt .= "Generate a logical, conversational, and technical follow-up question based on the student's latest answer, probing deeper into their understanding of the concepts.\n";
+            $prompt .= "CRITICAL INSTRUCTIONS:\n";
+            $prompt .= "1. Do NOT repeat or re-phrase any questions, terms, or concepts that have already been asked or discussed in the Chat History so far.\n";
+            $prompt .= "2. Dynamically pivot to a new or related sub-concept within the Syllabus Context to test their breadth of knowledge.\n";
+            $prompt .= "3. Keep your question concise, academically challenging, and under 50 words.";
+        } else {
+            $prompt .= "Generate the first verbal question to begin the oral exam. Choose a concept at random from the Syllabus Context (do NOT always start with the first week or first lecture). Keep it concise, technical, and under 50 words.";
+        }
+
+        $system = "You are a senior university professor and oral examiner (Viva Voce) for Visvesvaraya Technological University (VTU) conducting an exam for the course '{$courseTitle}'. You ask exactly one clear, challenging technical question. Do not include any preamble, headers, or greetings. Just output the question itself.";
+
+        // Higher temperature (0.85) for creative, non-repetitive questioning
+        return $this->callLLM($prompt, $system, false, 0.85);
+    }
+
+    /**
+     * Evaluate the complete viva conversation history and generate a scorecard.
+     */
+    public function evaluateViva($courseTitle, $aggregatedContent, $chatHistory)
+    {
+        $prompt = "Syllabus Context:\n{$aggregatedContent}\n\n";
+        $prompt .= "Dialogue History:\n{$chatHistory}\n\n";
+        $prompt .= "Evaluate the student's answers and compute a performance scorecard.
+        You MUST respond with a valid JSON object ONLY. Do not write any conversational preamble or markdown code blocks.
+        The JSON format must match this structure exactly:
+        {
+          \"score\": 8,
+          \"concepts\": \"Detail what they explained correctly, what errors they made, and what details they missed.\",
+          \"delivery\": \"Critique their vocabulary, use of key technical terms, and verbal clarity.\",
+          \"ideal_answers\": \"A brief model explanation of how a perfect answer to the questions would be structured.\"
+        }";
+
+        $system = "You are a university professor grading an oral exam (Viva Voce) for the course '{$courseTitle}'. You evaluate the dialogue against the syllabus and return a clean JSON scorecard.";
+
+        // Lower temperature (0.2) for strict, factual, and consistent evaluation grading
+        $response = $this->callLLM($prompt, $system, true, 0.2);
+        $cleanResponse = $this->cleanJsonResponse($response);
+        $decoded = json_decode($cleanResponse, true);
+
+        if (!$decoded || !isset($decoded['score'])) {
+            Log::error("Failed to parse AI Viva evaluation JSON.", ['response' => $response]);
+            return null;
+        }
+
+        return $decoded;
+    }
+
+    /**
      * Helper to clean up Markdown-wrapped JSON response from LLMs.
      */
     private function cleanJsonResponse($string)
@@ -154,11 +257,11 @@ class AIService
     /**
      * General function to invoke either Groq or Gemini API with fallback.
      */
-    protected function callLLM($prompt, $system = "You are a helpful assistant.", $isJson = false)
+    protected function callLLM($prompt, $system = "You are a helpful assistant.", $isJson = false, $temperature = 0.7)
     {
         // Try Groq First
         try {
-            $response = $this->callGroq($prompt, $system, $isJson);
+            $response = $this->callGroq($prompt, $system, $isJson, $temperature);
             if ($response) {
                 return $response;
             }
@@ -168,7 +271,7 @@ class AIService
 
         // Fallback to Gemini
         try {
-            $response = $this->callGemini($prompt, $system, $isJson);
+            $response = $this->callGemini($prompt, $system, $isJson, $temperature);
             if ($response) {
                 return $response;
             }
@@ -182,7 +285,7 @@ class AIService
     /**
      * Call Groq API with multi-model fallback.
      */
-    private function callGroq($prompt, $system, $isJson)
+    private function callGroq($prompt, $system, $isJson, $temperature)
     {
         $apiKey = config('services.groq.api_key') ?? env('GROQ_API_KEY');
         if (empty($apiKey)) {
@@ -206,6 +309,7 @@ class AIService
                         ['role' => 'user', 'content' => $prompt]
                     ],
                     'max_tokens' => 1500,
+                    'temperature' => $temperature,
                 ];
 
                 if ($isJson) {
@@ -237,7 +341,7 @@ class AIService
     /**
      * Call Gemini API with multiple endpoints and model fallback.
      */
-    private function callGemini($prompt, $system, $isJson)
+    private function callGemini($prompt, $system, $isJson, $temperature)
     {
         $apiKey = env('GEMINI_API_KEY');
         if (empty($apiKey)) {
@@ -267,7 +371,7 @@ class AIService
                     ],
                     'generationConfig' => [
                         'maxOutputTokens' => 2000,
-                        'temperature' => 0.2,
+                        'temperature' => $temperature,
                     ]
                 ];
 

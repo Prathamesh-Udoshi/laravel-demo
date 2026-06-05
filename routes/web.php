@@ -46,6 +46,16 @@ Route::prefix('courses')->group(function () {
     Route::get('/{id}/export', [CourseController::class, 'exportCourse'])->name('courses.export');
 });
 
+// AI Viva Voce Routes
+use App\Http\Controllers\VivaController;
+Route::prefix('courses/{courseId}/viva')->group(function () {
+    Route::get('/', [VivaController::class, 'show'])->name('viva.show');
+    Route::post('/start', [VivaController::class, 'start'])->name('viva.start');
+    Route::post('/submit', [VivaController::class, 'submit'])->name('viva.submit');
+    Route::post('/reset', [VivaController::class, 'reset'])->name('viva.reset');
+    Route::post('/transcribe', [VivaController::class, 'transcribe'])->name('viva.transcribe');
+});
+
 // MCQ CRUD Routes
 Route::get('/questions/{id}/edit', [CourseController::class, 'editQuestion'])->name('questions.edit');
 Route::put('/questions/{id}', [CourseController::class, 'updateQuestion'])->name('questions.update');
