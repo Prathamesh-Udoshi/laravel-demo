@@ -395,6 +395,40 @@
             }
         }
 
+        function formatScorecardSection(val) {
+            if (!val) return '';
+            if (typeof val === 'string') {
+                return val.replace(/\n/g, '<br>');
+            }
+            if (Array.isArray(val)) {
+                return val.map(item => `• ${item}`).join('<br>');
+            }
+            if (typeof val === 'object') {
+                let html = '';
+                for (const key in val) {
+                    if (val.hasOwnProperty(key)) {
+                        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                        const subVal = val[key];
+                        if (Array.isArray(subVal)) {
+                            html += `<strong>${capitalizedKey}:</strong><br>` + subVal.map(item => `• ${item}`).join('<br>') + '<br><br>';
+                        } else if (typeof subVal === 'object') {
+                            html += `<strong>${capitalizedKey}:</strong><br>`;
+                            for (const subKey in subVal) {
+                                if (subVal.hasOwnProperty(subKey)) {
+                                    html += `• <em>${subKey}:</em> ${subVal[subKey]}<br>`;
+                                }
+                            }
+                            html += '<br>';
+                        } else {
+                            html += `<strong>${capitalizedKey}:</strong> ${subVal}<br><br>`;
+                        }
+                    }
+                }
+                return html.trim();
+            }
+            return '';
+        }
+
         // 2. AJAX Submit
         async function submitAnswer() {
             if (isRecording) stopRecording();
@@ -442,9 +476,9 @@
                         document.getElementById('viva-scorecard').classList.remove('hidden');
 
                         document.getElementById('scorecard-score').innerText = data.scorecard.score;
-                        document.getElementById('scorecard-concepts').innerText = data.scorecard.concepts;
-                        document.getElementById('scorecard-delivery').innerText = data.scorecard.delivery;
-                        document.getElementById('scorecard-ideal').innerText = data.scorecard.ideal_answers;
+                        document.getElementById('scorecard-concepts').innerHTML = formatScorecardSection(data.scorecard.concepts);
+                        document.getElementById('scorecard-delivery').innerHTML = formatScorecardSection(data.scorecard.delivery);
+                        document.getElementById('scorecard-ideal').innerHTML = formatScorecardSection(data.scorecard.ideal_answers);
                     }
                 } else {
                     alert(data.message || 'Error submitting answer.');

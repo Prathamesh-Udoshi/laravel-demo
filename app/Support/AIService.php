@@ -189,17 +189,24 @@ class AIService
     {
         $prompt = "Syllabus Context:\n{$aggregatedContent}\n\n";
         if (!empty($chatHistory)) {
-            $prompt .= "Chat History so far:\n{$chatHistory}\n\n";
-            $prompt .= "Generate a logical, conversational, and technical follow-up question based on the student's latest answer, probing deeper into their understanding of the concepts.\n";
-            $prompt .= "CRITICAL INSTRUCTIONS:\n";
-            $prompt .= "1. Do NOT repeat or re-phrase any questions, terms, or concepts that have already been asked or discussed in the Chat History so far.\n";
-            $prompt .= "2. Dynamically pivot to a new or related sub-concept within the Syllabus Context to test their breadth of knowledge.\n";
-            $prompt .= "3. Keep your question concise, academically challenging, and under 50 words.";
+            $prompt .= "Dialogue History so far:\n{$chatHistory}\n\n";
+            $prompt .= "Analyze the Student's latest response and generate a direct, conversational, and technical follow-up question.\n\n";
+            $prompt .= "CRITICAL VIVA EXAMINER RULES:\n";
+            $prompt .= "1. LISTEN AND RESPOND: Your follow-up question MUST directly react to, critique, or build upon the claims, terms, or gaps in the student's latest answer.\n";
+            $prompt .= "   - If their answer was partially wrong or incomplete, challenge their mistake or omission directly (e.g. \"You stated that virtualization splits resources, but how does the hypervisor guarantee resource isolation between two active VMs?\").\n";
+            $prompt .= "   - If their answer was correct, take a specific term or mechanism they mentioned and push them one level deeper into the implementation details, trade-offs, or scenarios (e.g. \"Since you mentioned PaaS, what specific security and control trade-offs are developers making compared to IaaS?\").\n";
+            $prompt .= "2. NO GENERIC REPETITION: Do NOT ask standard textbook definition questions (like \"What is X?\" or \"Explain Y\"). Instead, ask \"Why\" or \"How\" questions focused on mechanisms, trade-offs, or scenarios.\n";
+            $prompt .= "3. CONTEXT INTEGRITY: Ensure the question remains grounded in the Syllabus Context. Do not ask about unrelated topics.\n";
+            $prompt .= "4. Keep the question extremely concise (under 45 words), sharp, and conversational.";
         } else {
-            $prompt .= "Generate the first verbal question to begin the oral exam. Choose a concept at random from the Syllabus Context (do NOT always start with the first week or first lecture). Keep it concise, technical, and under 50 words.";
+            $prompt .= "Generate the first technical question to begin the oral exam.\n\n";
+            $prompt .= "CRITICAL VIVA EXAMINER RULES:\n";
+            $prompt .= "1. Select a key concept at random from the Syllabus Context.\n";
+            $prompt .= "2. Ask a pointed, practical \"Why\" or \"How\" question rather than a simple definition (e.g. \"Why would a startup choose virtual machines over containers if they require kernel-level customization, and what is the cost trade-off?\").\n";
+            $prompt .= "3. Keep the question concise, technical, and under 40 words.";
         }
 
-        $system = "You are a senior university professor and oral examiner (Viva Voce) for Visvesvaraya Technological University (VTU) conducting an exam for the course '{$courseTitle}'. You ask exactly one clear, challenging technical question. Do not include any preamble, headers, or greetings. Just output the question itself.";
+        $system = "You are a strict, highly technical university professor and oral board examiner (Viva Voce) for Visvesvaraya Technological University (VTU) conducting an exam for the course '{$courseTitle}'. Your goal is to evaluate if the student has deep conceptual and practical understanding, rather than just memorized definitions. You must ask direct, probing technical questions. Never include any greetings, chatter, preambles, or headers. Output ONLY the question itself.";
 
         // Higher temperature (0.85) for creative, non-repetitive questioning
         return $this->callLLM($prompt, $system, false, 0.85);
@@ -349,9 +356,10 @@ class AIService
         }
 
         $models = [
+            'v1/models/gemini-2.0-flash',
+            'v1/models/gemini-3.5-flash',
+            'v1/models/gemini-2.5-flash-lite',
             'v1/models/gemini-1.5-flash',
-            'v1beta/models/gemini-1.5-flash-latest',
-            'v1/models/gemini-pro',
         ];
 
         $lastException = null;

@@ -4,23 +4,13 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Support\AI;
+use Illuminate\Console\Attributes\Signature;
+use Illuminate\Console\Attributes\Description;
 
+#[Signature('ai:ask {question}')]
+#[Description('Ask a question to the AI using the AI::chat()->prompt() method')]
 class AskAI extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'ai:ask {question}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Ask a question to the AI using the AI::chat()->prompt() method';
-
     /**
      * Execute the console command.
      */
