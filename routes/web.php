@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\TweetGeneratorController;
+use App\Http\Controllers\AIContextController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,5 +67,6 @@ Route::get('/test-sms', function (\App\Services\SmsService $sms) {
     return $sms->send('+919876543210', 'Hello! Your verification code is 8829.');
 });
 
-
-
+// AI Context Inspector & Playground Routes
+Route::get('/ai-context-inspector', [AIContextController::class, 'index'])->name('ai.context-inspector.index');
+Route::post('/ai-context-inspector/send', [AIContextController::class, 'send'])->name('ai.context-inspector.send');

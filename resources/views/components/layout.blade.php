@@ -210,6 +210,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="/ai-context-inspector" class="nav-link {{ str_starts_with($currentUri, '/ai-context-inspector') ? 'active' : '' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                        Context Inspector
+                    </a>
+                </li>
+                <li>
                     <a href="/sample" class="nav-link {{ str_starts_with($currentUri, '/sample') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         Student Directory
@@ -232,6 +238,7 @@
                 <a href="/courses">Course Planner</a>
                 <a href="/analyze">Work Diary</a>
                 <a href="/tweet-generator">Tweet Composer</a>
+                <a href="/ai-context-inspector">Context Inspector</a>
             </div>
         </div>
     </footer>
