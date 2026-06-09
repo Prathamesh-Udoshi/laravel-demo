@@ -37,13 +37,20 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
 * **What it does**: A simple route to test resolving and invoking the custom `SmsService` from the Laravel service container.
 * **Where to find it**: Access it at `/test-sms`.
 
+### 7. Interactive AI Lecture Tutor (RAG)
+An experiment in Retrieval-Augmented Generation (RAG) and local semantic search using Laravel 13 vector integrations.
+* **What it does**: Allows students to ask questions about courses in the Course Planner. The system segments lecture transcripts into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
+* **Vector Fallback Engine**: If pgvector extension is not installed (common on local Windows setups), the system catches the query exception and dynamically falls back to computing cosine similarity mathematically inside PHP, keeping search fully functional.
+* **Where to find it**: Access it at `/tutor` (configured via [TutorChatController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TutorChatController.php) and routes in `routes/web.php`).
+
 ---
 
 ## 🛠️ Stack & Technologies Used
 
 * **Framework**: Laravel 13 (PHP ^8.3)
-* **Frontend**: Blade templates, TailwindCSS, Vite, Browser Audio Recorder APIs
-* **AI Orchestration**: Custom multi-model failover logic in [AIService](file:///c:/Users/Prathamesh/Herd/myapp/app/Support/AIService.php) calling Groq Cloud (Llama & Whisper for Speech-to-Text) and Google Gemini APIs.
+* **Database**: PostgreSQL (with optional `pgvector` extension; fallbacks to native PHP cosine similarity logic if missing)
+* **Frontend**: Blade templates, Vanilla CSS (harmonious light mode styling), CSS micro-animations, real-time RAG context inspector
+* **AI Orchestration**: Custom multi-model failover logic in [AIService](file:///c:/Users/Prathamesh/Herd/myapp/app/Support/AIService.php) calling Groq Cloud (Llama & Whisper for Speech-to-Text) and Google Gemini APIs. Vectorization and RAG conversation memory managed via the `laravel/ai` SDK.
 * **Testing & Tools**: Pest PHP, Laravel Pail, Laravel Tinker, Laravel MCP.
 
 ---
@@ -57,7 +64,7 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
    ```
 
 2. **Configure Environment Variables**:
-   Copy `.env.example` to `.env` and fill in your API keys (Groq and/or Gemini):
+   Copy `.env.example` to `.env` and fill in your API keys (Groq and/or Gemini) and database credentials:
    ```bash
    cp .env.example .env
    ```
@@ -68,8 +75,15 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
    composer run setup
    ```
 
-4. **Start the local server**:
+4. **Synchronously Vectorize Existing Transcripts**:
+   If there are existing courses in the planner that haven't been vectorized yet, run the Artisan command:
+   ```bash
+   php artisan app:chunk-transcripts
+   ```
+
+5. **Start the local server & queue listener**:
+   For new courses and week summaries to be vectorized dynamically, a queue worker must be active:
    ```bash
    npm run dev
    ```
-   This will concurrently run the PHP server, the Vite asset builder, and the Laravel queue listener.
+   *(This runs the PHP server, Vite assets, and `php artisan queue:listen` concurrently. If you run your server through Laravel Herd, open a terminal window and run `php artisan queue:listen`, or set `QUEUE_CONNECTION=sync` in your `.env` to process them instantly).*

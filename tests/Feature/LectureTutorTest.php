@@ -100,3 +100,37 @@ test('fallback similarity search returns closest chunks on unsupported databases
     expect($results->count())->toBe(1);
     expect($results->first()->id)->toBe($chunk1->id);
 });
+
+test('searchSimilar correctly filters by course ID', function () {
+    Embeddings::fake([
+        [[0.9, 0.1, 0.0]],
+        [[0.9, 0.1, 0.0]]
+    ]);
+
+    $courseA = Course::create(['title' => 'Course A', 'description' => 'A', 'duration_weeks' => 1]);
+    $courseB = Course::create(['title' => 'Course B', 'description' => 'B', 'duration_weeks' => 1]);
+
+    $contentA = WeeklyContent::withoutEvents(fn() => WeeklyContent::create(['course_id' => $courseA->id, 'week_number' => 1, 'video_title' => 'A']));
+    $contentB = WeeklyContent::withoutEvents(fn() => WeeklyContent::create(['course_id' => $courseB->id, 'week_number' => 1, 'video_title' => 'B']));
+
+    $chunkA = WeeklyContentChunk::create([
+        'weekly_content_id' => $contentA->id,
+        'chunk_index' => 0,
+        'content' => 'Chunk from Course A',
+        'embedding' => [0.9, 0.1, 0.0],
+    ]);
+
+    $chunkB = WeeklyContentChunk::create([
+        'weekly_content_id' => $contentB->id,
+        'chunk_index' => 0,
+        'content' => 'Chunk from Course B',
+        'embedding' => [0.9, 0.1, 0.0],
+    ]);
+
+    // Query Course A specifically
+    $results = WeeklyContentChunk::searchSimilar('query', minSimilarity: 0.1, limit: 5, courseId: $courseA->id);
+    
+    expect($results)->not->toBeEmpty();
+    expect($results->count())->toBe(1);
+    expect($results->first()->weeklyContent->course_id)->toBe($courseA->id);
+});

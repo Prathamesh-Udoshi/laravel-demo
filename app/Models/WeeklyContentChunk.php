@@ -47,11 +47,15 @@ class WeeklyContentChunk extends Model
      * @param  int  $limit
      * @return Collection<int, WeeklyContentChunk>
      */
-    public static function searchSimilar(string $query, float $minSimilarity = 0.3, int $limit = 5): Collection
+    public static function searchSimilar(string $query, float $minSimilarity = 0.3, int $limit = 5, ?int $courseId = null): Collection
     {
         try {
+            $queryBuilder = self::query();
+            if ($courseId) {
+                $queryBuilder->whereHas('weeklyContent', fn ($q) => $q->where('course_id', $courseId));
+            }
             // Attempt native SQL vector search (Laravel 13 whereVectorSimilarTo)
-            return self::query()
+            return $queryBuilder
                 ->whereVectorSimilarTo('embedding', $query, $minSimilarity)
                 ->limit($limit)
                 ->get();
@@ -63,8 +67,12 @@ class WeeklyContentChunk extends Model
                 return collect();
             }
 
-            // Retrieve all chunks from database (suitable for medium size dataset)
-            $chunks = self::with('weeklyContent.course')->get();
+            // Retrieve filtered chunks from database
+            $queryBuilder = self::with('weeklyContent.course');
+            if ($courseId) {
+                $queryBuilder->whereHas('weeklyContent', fn ($q) => $q->where('course_id', $courseId));
+            }
+            $chunks = $queryBuilder->get();
 
             return $chunks->map(function ($chunk) use ($queryEmbedding) {
                 $chunkEmbedding = $chunk->embedding;

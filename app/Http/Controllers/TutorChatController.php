@@ -37,14 +37,12 @@ class TutorChatController extends Controller
         $courseId = $request->input('course_id');
 
         // 1. Retrieve matching chunks using the custom semantic search (with pgvector/PHP fallback)
-        $chunks = WeeklyContentChunk::searchSimilar($question, minSimilarity: 0.2, limit: 3);
-
-        // 2. Filter by course if selected
-        if ($courseId) {
-            $chunks = $chunks->filter(function ($chunk) use ($courseId) {
-                return $chunk->weeklyContent->course_id == $courseId;
-            })->values();
-        }
+        $chunks = WeeklyContentChunk::searchSimilar(
+            query: $question,
+            minSimilarity: 0.22,
+            limit: 3,
+            courseId: $courseId
+        );
 
         // 3. Construct context block for the RAG agent
         $context = '';
