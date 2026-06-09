@@ -216,6 +216,12 @@
                     </a>
                 </li>
                 <li>
+                    <a href="/tutor" class="nav-link {{ str_starts_with($currentUri, '/tutor') ? 'active' : '' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        Lecture Tutor
+                    </a>
+                </li>
+                <li>
                     <a href="/sample" class="nav-link {{ str_starts_with($currentUri, '/sample') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         Student Directory
@@ -238,6 +244,7 @@
                 <a href="/courses">Course Planner</a>
                 <a href="/analyze">Work Diary</a>
                 <a href="/tweet-generator">Tweet Composer</a>
+                <a href="/tutor">Lecture Tutor</a>
                 <a href="/ai-context-inspector">Context Inspector</a>
             </div>
         </div>

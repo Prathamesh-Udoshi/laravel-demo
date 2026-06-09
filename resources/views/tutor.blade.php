@@ -1,707 +1,344 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>AI Lecture Tutor - Semantic Course Assistant</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
-            --panel-bg: rgba(30, 41, 59, 0.45);
-            --panel-border: rgba(255, 255, 255, 0.08);
-            --glass-blur: blur(16px);
+<x-layout>
+    <x-slot:title>AI Lecture Tutor</x-slot>
+
+    <!-- Top Intro Hero Section -->
+    <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-bottom: 2px solid var(--border); padding: 3rem 0;">
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 1.5rem;">
+            <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.8rem; background: rgba(79, 70, 229, 0.06); border: 1px solid rgba(79, 70, 229, 0.12); color: var(--primary); font-size: 0.75rem; font-weight: 800; margin-bottom: 1rem; letter-spacing: 0.05em; text-transform: uppercase;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                AI Lecture Tutor & Study Assistant
+            </div>
+            <h1 style="font-size: 2.75rem; font-weight: 900; letter-spacing: -0.04em; color: var(--text-main); margin-bottom: 0.75rem; font-family: 'Outfit', sans-serif;">
+                Semantic Lecture <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Search & Q&A</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 750px; font-weight: 500; line-height: 1.6;">
+                Ask questions about your courses. The system generates embeddings, performs a vector search over lecture transcripts and notes, and answers using exact matches.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 3rem 1.5rem; display: grid; grid-template-columns: 1fr 2fr; gap: 2.5rem; align-items: start;">
+        
+        <!-- Left Sidebar: Course Selector & Live Inspector -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
             
-            --primary: #818cf8;
-            --primary-glow: rgba(129, 140, 248, 0.3);
-            --secondary: #c084fc;
-            --accent: #22d3ee;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --sidebar-width: 320px;
+            <!-- Course Selector Card -->
+            <div class="card" style="padding: 2rem; margin-bottom: 0; border-top: 4px solid var(--primary);">
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.25rem; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>📚</span> Select Course Context
+                </h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <button 
+                        type="button" 
+                        class="course-btn active" 
+                        onclick="selectCourse(this, '')"
+                        style="width: 100%; justify-content: flex-start; text-align: left; padding: 0.85rem 1.25rem; background: var(--primary); color: white; border: none; font-weight: 700; font-size: 0.9rem; transition: all 0.2s;"
+                    >
+                        All Courses
+                    </button>
+                    
+                    @foreach($courses as $course)
+                        <button 
+                            type="button" 
+                            class="course-btn" 
+                            onclick="selectCourse(this, '{{ $course->id }}')"
+                            style="width: 100%; justify-content: flex-start; text-align: left; padding: 0.85rem 1.25rem; background: white; color: var(--text-main); border: 2px solid var(--border); font-weight: 700; font-size: 0.9rem; transition: all 0.2s;"
+                        >
+                            {{ $course->title }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Live Semantic Context Inspector Card -->
+            <div class="card" style="padding: 2rem; margin-bottom: 0; border-top: 4px solid var(--accent); min-height: 300px; display: flex; flex-direction: column;">
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.25rem; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🔍</span> Context Retrieved (RAG)
+                </h3>
+                
+                <div id="emptyInspector" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; color: var(--text-muted); font-size: 0.9rem; gap: 0.75rem; padding: 2rem 0;">
+                    <div style="font-size: 2rem; opacity: 0.4;">📂</div>
+                    <p style="margin-bottom: 0; line-height: 1.4;">Matching lecture segments will be displayed here in real-time when you ask a question.</p>
+                </div>
+                
+                <div id="inspectorContent" style="display: none; flex-grow: 1; overflow-y: auto; max-height: 350px; padding-right: 0.25rem;"></div>
+            </div>
+        </div>
+
+        <!-- Right: AI Chat Interface -->
+        <div class="card" style="padding: 2.5rem; margin-bottom: 0; display: flex; flex-direction: column; height: 600px; border-top: 4px solid var(--accent);">
+            
+            <!-- Messages Box -->
+            <div id="messagesContainer" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+                <!-- System Greeting -->
+                <div style="display: flex; justify-content: flex-start;">
+                    <div style="max-width: 85%; padding: 1rem 1.25rem; background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); font-size: 0.95rem; line-height: 1.6;">
+                        Hello! I am your AI Lecture Tutor. Ask me any question related to your class lectures, notes, or transcripts.
+                        <br><br>
+                        For example: 
+                        <br>
+                        <code>"Explain database indexing in week 2."</code> or 
+                        <code>"What are routes in Laravel?"</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form id="chatForm" onsubmit="sendMessage(event)" style="margin-top: auto;">
+                <div style="display: flex; gap: 0.75rem; position: relative;">
+                    <input 
+                        type="text" 
+                        id="chatInput" 
+                        placeholder="Type your question here..." 
+                        style="flex-grow: 1; padding: 1rem 1.25rem; font-size: 0.95rem;" 
+                        autocomplete="off" 
+                        required
+                    >
+                    <button type="submit" id="sendBtn" style="padding: 0 2rem; font-weight: 700; white-space: nowrap;">
+                        Ask AI
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Page Specific Styles & Scripts -->
+    <style>
+        .course-btn:hover {
+            border-color: var(--primary) !important;
+            background: rgba(79, 70, 229, 0.04) !important;
+            color: var(--primary) !important;
+        }
+        
+        .course-btn.active {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            min-height: 100vh;
+        .chat-msg-user {
             display: flex;
-            overflow: hidden;
-        }
-
-        /* Layout */
-        .container {
-            display: flex;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        /* Sidebar styling */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: rgba(15, 23, 42, 0.6);
-            border-right: 1px solid var(--panel-border);
-            backdrop-filter: var(--glass-blur);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            z-index: 10;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 4px 14px var(--primary-glow);
-        }
-
-        .logo-text h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            background: linear-gradient(to right, #fff, var(--text-muted));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .logo-text span {
-            font-size: 0.75rem;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 600;
-        }
-
-        .section-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .course-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            overflow-y: auto;
-            flex: 1;
-            padding-right: 0.25rem;
-        }
-
-        .course-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .course-list::-webkit-scrollbar-thumb {
-            background: var(--panel-border);
-            border-radius: 4px;
-        }
-
-        .course-item {
-            padding: 1rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--panel-border);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .course-item:hover, .course-item.active {
-            background: rgba(129, 140, 248, 0.08);
-            border-color: rgba(129, 140, 248, 0.4);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .course-item.active {
-            background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(192, 132, 252, 0.05));
-        }
-
-        .course-item h3 {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #fff;
-            line-height: 1.4;
-        }
-
-        .course-item p {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            line-height: 1.5;
-        }
-
-        /* Main Chat Area */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-            background: transparent;
-        }
-
-        .header-panel {
-            padding: 1.5rem 2.5rem;
-            border-bottom: 1px solid var(--panel-border);
-            backdrop-filter: var(--glass-blur);
-            background: rgba(15, 23, 42, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-info h2 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .header-info p {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.2rem;
-        }
-
-        .badge {
-            background: rgba(34, 211, 238, 0.1);
-            color: var(--accent);
-            border: 1px solid rgba(34, 211, 238, 0.2);
-            padding: 0.25rem 0.75rem;
-            border-radius: 99px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .messages-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            scroll-behavior: smooth;
-        }
-
-        .messages-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .messages-container::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 99px;
-        }
-
-        .message-row {
-            display: flex;
-            width: 100%;
-        }
-
-        .message-row.user {
             justify-content: flex-end;
         }
 
-        .message-bubble {
-            max-width: 70%;
-            padding: 1.2rem 1.5rem;
-            border-radius: 20px;
-            line-height: 1.6;
+        .chat-msg-user .bubble {
+            max-width: 85%;
+            padding: 1rem 1.25rem;
+            background: var(--primary);
+            color: white;
             font-size: 0.95rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            position: relative;
-            animation: fadeInBubble 0.3s ease-out;
+            line-height: 1.6;
         }
 
-        @keyframes fadeInBubble {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .chat-msg-assistant {
+            display: flex;
+            justify-content: flex-start;
         }
 
-        .message-row.user .message-bubble {
-            background: linear-gradient(135deg, var(--primary), #6366f1);
-            color: #fff;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        .chat-msg-assistant .bubble {
+            max-width: 85%;
+            padding: 1rem 1.25rem;
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.6;
         }
 
-        .message-row.assistant .message-bubble {
-            background: var(--panel-bg);
-            border: 1px solid var(--panel-border);
-            color: #e2e8f0;
-            border-bottom-left-radius: 4px;
-            backdrop-filter: var(--glass-blur);
-        }
-
-        .message-bubble code {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
+        .bubble code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.15rem 0.3rem;
             font-family: monospace;
             font-size: 0.85rem;
-            color: #fda4af;
+            color: #b91c1c;
         }
 
-        .message-bubble pre {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 1rem;
-            border-radius: 8px;
+        .bubble pre {
+            background: #f1f5f9;
+            padding: 0.75rem;
             overflow-x: auto;
-            margin: 0.8rem 0;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-left: 3px solid var(--primary);
+            margin: 0.75rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
         }
 
-        .message-bubble pre code {
+        .bubble pre code {
             background: transparent;
             padding: 0;
-            color: #e2e8f0;
-            font-size: 0.85rem;
+            color: #334155;
         }
 
-        /* Input Area */
-        .input-panel {
-            padding: 1.5rem 2.5rem;
-            background: rgba(15, 23, 42, 0.4);
-            border-top: 1px solid var(--panel-border);
-            backdrop-filter: var(--glass-blur);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 1rem;
-            position: relative;
-        }
-
-        .chat-input {
-            flex: 1;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            padding: 1.2rem 1.5rem;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .chat-input:focus {
-            border-color: rgba(129, 140, 248, 0.6);
-            box-shadow: 0 0 15px rgba(129, 140, 248, 0.15), inset 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .send-button {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            color: #fff;
-            padding: 0 1.8rem;
-            border-radius: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px var(--primary-glow);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(129, 140, 248, 0.4);
-        }
-
-        .send-button:active {
-            transform: translateY(0);
-        }
-
-        .send-button:disabled {
-            background: #334155;
-            color: var(--text-muted);
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* RAG Debug Inspector panel (Right side) */
-        .inspector-panel {
-            width: 360px;
-            background: rgba(15, 23, 42, 0.4);
-            border-left: 1px solid var(--panel-border);
-            backdrop-filter: var(--glass-blur);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .inspector-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 1.5rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--panel-border);
-        }
-
-        .inspector-icon {
-            color: var(--accent);
-        }
-
-        .snippet-card {
-            background: rgba(30, 41, 59, 0.3);
-            border: 1px solid var(--panel-border);
-            border-radius: 12px;
+        .snippet-box {
             padding: 1rem;
-            margin-bottom: 1rem;
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
             font-size: 0.8rem;
             line-height: 1.5;
-            animation: fadeIn 0.5s ease;
+            margin-bottom: 0.75rem;
         }
 
-        .snippet-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .snippet-score {
-            background: rgba(34, 211, 238, 0.12);
-            color: var(--accent);
-            padding: 0.1rem 0.4rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-        }
-
-        .snippet-text {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        .empty-inspector {
-            display: flex;
-            flex-direction: column;
+        /* Typing indicator animation */
+        .typing-dots {
+            display: inline-flex;
+            gap: 0.3rem;
             align-items: center;
-            justify-content: center;
-            flex: 1;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            gap: 1rem;
         }
-
-        .empty-icon {
-            font-size: 2.5rem;
-            opacity: 0.3;
-        }
-
-        /* Typing indicator */
-        .typing-indicator {
-            display: flex;
-            gap: 0.4rem;
-            padding: 0.3rem 0;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
+        .typing-dot {
+            width: 6px;
+            height: 6px;
             background: var(--text-muted);
             border-radius: 50%;
             animation: bounce 1.4s infinite ease-in-out both;
         }
-
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce {
             0%, 80%, 100% { transform: scale(0); }
             40% { transform: scale(1.0); }
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
     </style>
-</head>
-<body>
 
-<div class="container">
-    
-    <!-- Sidebar: Course Selector -->
-    <aside class="sidebar">
-        <div class="logo-area">
-            <div class="logo-icon">AI</div>
-            <div class="logo-text">
-                <h1>Lecture Tutor</h1>
-                <span>Laravel 13 RAG</span>
-            </div>
-        </div>
-        
-        <h2 class="section-title">Select a Course</h2>
-        <ul class="course-list" id="courseList">
-            <li class="course-item active" data-course-id="" onclick="selectCourse(this, '')">
-                <h3>All Courses</h3>
-                <p>Query transcripts across all registered courses semantically.</p>
-            </li>
-            @foreach($courses as $course)
-                <li class="course-item" data-course-id="{{ $course->id }}" onclick="selectCourse(this, '{{ $course->id }}')">
-                    <h3>{{ $course->title }}</h3>
-                    <p>{{ $course->description }}</p>
-                </li>
-            @endforeach
-        </ul>
-    </aside>
+    <script>
+        let activeCourseId = '';
+        let conversationId = null;
 
-    <!-- Main Chat Window -->
-    <main class="chat-area">
-        <header class="header-panel">
-            <div class="header-info">
-                <h2 id="currentCourseTitle">All Courses</h2>
-                <p>AI lecture assistant powered by Gemini Embeddings & Vector Search</p>
-            </div>
-            <div>
-                <span class="badge" id="vectorStatus">Active Fallback Mode</span>
-            </div>
-        </header>
-
-        <!-- Messages Area -->
-        <section class="messages-container" id="messagesContainer">
-            <div class="message-row assistant">
-                <div class="message-bubble">
-                    Hello! I'm your AI Lecture Tutor. Ask me any questions about your lectures, transcripts, or notes! 
-                    For example, you could ask me: 
-                    <br><br>
-                    <code>"What did the instructor say about database indexes in week 2?"</code> or 
-                    <code>"How do routes work in Laravel?"</code>
-                </div>
-            </div>
-        </section>
-
-        <!-- Input Box -->
-        <footer class="input-panel">
-            <form id="chatForm" onsubmit="sendMessage(event)" class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="chatInput" 
-                    class="chat-input" 
-                    placeholder="Ask a question about the lectures..." 
-                    autocomplete="off" 
-                    required
-                >
-                <button type="submit" id="sendBtn" class="send-button">
-                    <span>Ask AI</span>
-                </button>
-            </form>
-        </footer>
-    </main>
-
-    <!-- Right Panel: RAG Context Inspector -->
-    <aside class="inspector-panel" id="inspectorPanel">
-        <h3 class="inspector-title">
-            <span class="inspector-icon">🔍</span> Semantic Context Used
-        </h3>
-        <div class="empty-inspector" id="emptyInspector">
-            <div class="empty-icon">📂</div>
-            <p>Retrieved segments will show up here in real-time when you ask a question.</p>
-        </div>
-        <div id="inspectorContent" style="display: none;"></div>
-    </aside>
-
-</div>
-
-<script>
-    let activeCourseId = '';
-    let conversationId = null;
-
-    function selectCourse(element, courseId) {
-        document.querySelectorAll('.course-item').forEach(el => el.classList.remove('active'));
-        element.classList.add('active');
-        activeCourseId = courseId;
-        
-        const title = element.querySelector('h3').textContent;
-        document.getElementById('currentCourseTitle').textContent = title;
-    }
-
-    function appendMessage(sender, text) {
-        const container = document.getElementById('messagesContainer');
-        const row = document.createElement('div');
-        row.className = `message-row ${sender}`;
-        
-        const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
-        
-        // Handle code snippets display formatted
-        let formattedText = text
-            .replace(/`([^`]+)`/g, '<code>$1</code>')
-            .replace(/```([a-z]*)\n([\s\S]+?)\n```/g, '<pre><code>$2</code></pre>');
-            
-        bubble.innerHTML = formattedText;
-        row.appendChild(bubble);
-        container.appendChild(row);
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function showTypingIndicator() {
-        const container = document.getElementById('messagesContainer');
-        const row = document.createElement('div');
-        row.className = 'message-row assistant';
-        row.id = 'typingIndicatorRow';
-        
-        const bubble = document.createElement('div');
-        bubble.className = 'message-bubble';
-        
-        const indicator = document.createElement('div');
-        indicator.className = 'typing-indicator';
-        indicator.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-        
-        bubble.appendChild(indicator);
-        row.appendChild(bubble);
-        container.appendChild(row);
-        container.scrollTop = container.scrollHeight;
-    }
-
-    function removeTypingIndicator() {
-        const el = document.getElementById('typingIndicatorRow');
-        if (el) el.remove();
-    }
-
-    function updateInspector(contextList) {
-        const emptyEl = document.getElementById('emptyInspector');
-        const contentEl = document.getElementById('inspectorContent');
-        
-        if (!contextList || contextList.length === 0) {
-            emptyEl.style.display = 'flex';
-            contentEl.style.display = 'none';
-            return;
+        function selectCourse(btn, courseId) {
+            document.querySelectorAll('.course-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeCourseId = courseId;
         }
 
-        emptyEl.style.display = 'none';
-        contentEl.style.display = 'block';
-        contentEl.innerHTML = '';
-
-        contextList.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'snippet-card';
+        function appendMessage(sender, text) {
+            const container = document.getElementById('messagesContainer');
+            const row = document.createElement('div');
+            row.className = `chat-msg-${sender}`;
             
-            const header = document.createElement('div');
-            header.className = 'snippet-header';
-            header.innerHTML = `
-                <span>${item.lesson} (W${item.week})</span>
-                <span class="snippet-score">Similarity: ${item.similarity}</span>
-            `;
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
             
-            const text = document.createElement('div');
-            text.className = 'snippet-text';
-            text.textContent = `"${item.snippet}"`;
+            // Basic formatting for Markdown style pre blocks and code inline
+            let formattedText = text
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/```([a-z]*)\n([\s\S]+?)\n```/g, '<pre><code>$2</code></pre>');
+                
+            bubble.innerHTML = formattedText;
+            row.appendChild(bubble);
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+        }
 
-            card.appendChild(header);
-            card.appendChild(text);
-            contentEl.appendChild(card);
-        });
-    }
+        function showTypingIndicator() {
+            const container = document.getElementById('messagesContainer');
+            const row = document.createElement('div');
+            row.className = 'chat-msg-assistant';
+            row.id = 'typingIndicatorRow';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = '<div class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
+            
+            row.appendChild(bubble);
+            container.appendChild(row);
+            container.scrollTop = container.scrollHeight;
+        }
 
-    async function sendMessage(event) {
-        event.preventDefault();
-        
-        const inputEl = document.getElementById('chatInput');
-        const message = inputEl.value.trim();
-        if (!message) return;
+        function removeTypingIndicator() {
+            const el = document.getElementById('typingIndicatorRow');
+            if (el) el.remove();
+        }
 
-        // Reset input and disable UI
-        inputEl.value = '';
-        inputEl.disabled = true;
-        const sendBtn = document.getElementById('sendBtn');
-        sendBtn.disabled = true;
-
-        // Show user message
-        appendMessage('user', message);
-        
-        // Show typing animation
-        showTypingIndicator();
-
-        try {
-            const response = await fetch('/tutor/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    message: message,
-                    course_id: activeCourseId || null,
-                    conversation_id: conversationId
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+        function updateInspector(contextList) {
+            const emptyEl = document.getElementById('emptyInspector');
+            const contentEl = document.getElementById('inspectorContent');
+            
+            if (!contextList || contextList.length === 0) {
+                emptyEl.style.display = 'flex';
+                contentEl.style.display = 'none';
+                return;
             }
 
-            const data = await response.json();
-            
-            // Remove typing bubble
-            removeTypingIndicator();
-            
-            // Append assistant response
-            appendMessage('assistant', data.reply);
-            
-            // Update conversation tracker
-            conversationId = data.conversation_id;
-            
-            // Update semantic context inspector panel
-            updateInspector(data.context_used);
+            emptyEl.style.display = 'none';
+            contentEl.style.display = 'block';
+            contentEl.innerHTML = '';
 
-        } catch (error) {
-            console.error('Error:', error);
-            removeTypingIndicator();
-            appendMessage('assistant', 'Sorry, I couldn\'t process that request. Please make sure your server is running and check console log.');
-        } finally {
-            inputEl.disabled = false;
-            sendBtn.disabled = false;
-            inputEl.focus();
+            contextList.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'snippet-box';
+                box.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--primary); margin-bottom:0.4rem; font-size:0.75rem;">
+                        <span>${item.lesson} (W${item.week})</span>
+                        <span style="color:var(--accent);">Score: ${item.similarity}</span>
+                    </div>
+                    <div style="color:var(--text-muted); font-style:italic;">"${item.snippet}"</div>
+                `;
+                contentEl.appendChild(box);
+            });
         }
-    }
-</script>
 
-</body>
-</html>
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            const inputEl = document.getElementById('chatInput');
+            const message = inputEl.value.trim();
+            if (!message) return;
+
+            // Reset input and disable UI elements
+            inputEl.value = '';
+            inputEl.disabled = true;
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            // Append user query in chat
+            appendMessage('user', message);
+            
+            // Show typing indicator bubble
+            showTypingIndicator();
+
+            try {
+                const response = await fetch('/tutor/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        course_id: activeCourseId || null,
+                        conversation_id: conversationId
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response error');
+                }
+
+                const data = await response.json();
+                
+                removeTypingIndicator();
+                
+                // Print response
+                appendMessage('assistant', data.reply);
+                
+                // Store conversation state
+                conversationId = data.conversation_id;
+                
+                // Show logs
+                updateInspector(data.context_used);
+
+            } catch (error) {
+                console.error(error);
+                removeTypingIndicator();
+                appendMessage('assistant', 'I could not communicate with the backend server. Please verify database connection and credentials.');
+            } finally {
+                inputEl.disabled = false;
+                sendBtn.disabled = false;
+                inputEl.focus();
+            }
+        }
+    </script>
+</x-layout>

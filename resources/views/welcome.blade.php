@@ -141,6 +141,30 @@
                 </a>
             </div>
 
+            <!-- Card 5: AI Lecture Tutor (RAG) -->
+            <div class="card animate-fade-in" style="margin-bottom: 0; padding: 3rem; display: flex; flex-direction: column; height: 100%; border-top: 4px solid var(--primary); transition: all 0.3s ease;">
+                <div style="width: 54px; height: 54px; background: rgba(79, 70, 229, 0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.75rem; color: var(--primary);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                
+                <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem; font-family: 'Outfit', sans-serif;">
+                    AI Lecture Tutor (RAG)
+                </h3>
+                
+                <p style="color: var(--text-muted); font-size: 0.975rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1;">
+                    Query course lecture notes, video transcripts, and summaries semantically using dynamic vector embeddings. Ask questions in natural language and get replies backed by matching class material segments.
+                </p>
+
+                <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-left: 3px solid var(--primary); font-size: 0.85rem; font-family: monospace; color: #475569; margin-bottom: 2rem;">
+                    <strong>API Tech:</strong> Gemini Embeddings • Cosine Similarity Fallback • AI Conversational Agent
+                </div>
+                
+                <a href="/tutor" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">
+                    Launch AI Tutor
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+
         </div>
     </div>
 </x-layout>
