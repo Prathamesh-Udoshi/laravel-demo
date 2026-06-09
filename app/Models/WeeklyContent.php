@@ -27,4 +27,12 @@ class WeeklyContent extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    /**
+     * Get the semantic chunks for this week's content.
+     */
+    public function chunks()
+    {
+        return $this->hasMany(WeeklyContentChunk::class, 'weekly_content_id');
+    }
 }

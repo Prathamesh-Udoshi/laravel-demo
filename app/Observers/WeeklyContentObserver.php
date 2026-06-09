@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Observers;
+
+use App\Jobs\ChunkWeeklyContentJob;
+use App\Models\WeeklyContent;
+
+class WeeklyContentObserver
+{
+    /**
+     * Handle the WeeklyContent "saved" event.
+     */
+    public function saved(WeeklyContent $weeklyContent): void
+    {
+        // Only trigger embedding chunking if transcript/notes or summary changed
+        if ($weeklyContent->wasChanged('transcript_or_notes') || $weeklyContent->wasChanged('summary') || $weeklyContent->wasRecentlyCreated) {
+            ChunkWeeklyContentJob::dispatch($weeklyContent);
+        }
+    }
+}

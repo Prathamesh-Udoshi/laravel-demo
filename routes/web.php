@@ -70,3 +70,8 @@ Route::get('/test-sms', function (\App\Services\SmsService $sms) {
 // AI Context Inspector & Playground Routes
 Route::get('/ai-context-inspector', [AIContextController::class, 'index'])->name('ai.context-inspector.index');
 Route::post('/ai-context-inspector/send', [AIContextController::class, 'send'])->name('ai.context-inspector.send');
+
+// AI Lecture Tutor (RAG) Routes
+use App\Http\Controllers\TutorChatController;
+Route::get('/tutor', [TutorChatController::class, 'index'])->name('tutor.index');
+Route::post('/tutor/chat', [TutorChatController::class, 'chat'])->name('tutor.chat');
