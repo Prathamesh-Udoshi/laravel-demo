@@ -39,7 +39,7 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
 
 ### 7. Interactive AI Lecture Tutor (RAG)
 An experiment in Retrieval-Augmented Generation (RAG) and local semantic search using Laravel 13 vector integrations.
-* **What it does**: Allows students to ask questions about courses in the Course Planner. The system segments lecture transcripts into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
+* **What it does**: Allows students to ask questions about courses in the Course Planner. **This works exclusively for courses dynamically created and processed in the Course Planner (`/courses`).** The system segments lecture transcripts into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
 * **Vector Fallback Engine**: If pgvector extension is not installed (common on local Windows setups), the system catches the query exception and dynamically falls back to computing cosine similarity mathematically inside PHP, keeping search fully functional.
 * **Where to find it**: Access it at `/tutor` (configured via [TutorChatController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TutorChatController.php) and routes in `routes/web.php`).
 
@@ -75,15 +75,21 @@ An experiment in Retrieval-Augmented Generation (RAG) and local semantic search 
    composer run setup
    ```
 
-4. **Synchronously Vectorize Existing Transcripts**:
-   If there are existing courses in the planner that haven't been vectorized yet, run the Artisan command:
-   ```bash
-   php artisan app:chunk-transcripts
-   ```
+4. **Vectorize Transcripts and Process Background Jobs**:
+   When new courses are created or weeks are processed, transcripts are chunked and vectorized using Laravel background jobs. You can run or process these manually:
+   * **Start the queue worker manually** to process queued embedding jobs in the background:
+     ```bash
+     php artisan queue:work
+     # or
+     php artisan queue:listen
+     ```
+   * **Force run vectorization on all transcripts synchronously** at once:
+     ```bash
+     php artisan app:chunk-transcripts
+     ```
 
-5. **Start the local server & queue listener**:
-   For new courses and week summaries to be vectorized dynamically, a queue worker must be active:
+5. **Start the local server**:
    ```bash
    npm run dev
    ```
-   *(This runs the PHP server, Vite assets, and `php artisan queue:listen` concurrently. If you run your server through Laravel Herd, open a terminal window and run `php artisan queue:listen`, or set `QUEUE_CONNECTION=sync` in your `.env` to process them instantly).*
+   *(This runs the PHP server, Vite assets, and the queue listener concurrently. If you run your server through Laravel Herd, make sure to either start the queue worker manually as shown in step 4, or set `QUEUE_CONNECTION=sync` in your `.env` to process jobs instantly).*
