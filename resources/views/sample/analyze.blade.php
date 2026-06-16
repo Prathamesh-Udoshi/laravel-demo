@@ -38,16 +38,23 @@
                         Activity</label>
                     <textarea name="description" id="description" placeholder="Describe your activity..." rows="4"
                         required></textarea>
-                    <div class="timer-badge">00:00</div>
                     <button type="button" class="mic-btn" onclick="handleMicClick('description', this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                             <line x1="12" x2="12" y1="19" y2="22" />
                             <line x1="8" x2="16" y1="22" y2="22" />
                         </svg>
+                        <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="20" height="20" style="display: none; animation: spin 1s linear infinite;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25;"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path>
+                        </svg>
                     </button>
+                    <div class="timer-badge">
+                        <span class="ping-dot"></span>
+                        <span class="timer-text">00:00</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -63,16 +70,23 @@
                         Learnings</label>
                     <textarea name="learnings" id="learnings" placeholder="What did you learn today?"
                         rows="3"></textarea>
-                    <div class="timer-badge">00:00</div>
                     <button type="button" class="mic-btn" onclick="handleMicClick('learnings', this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                             <line x1="12" x2="12" y1="19" y2="22" />
                             <line x1="8" x2="16" y1="22" y2="22" />
                         </svg>
+                        <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="20" height="20" style="display: none; animation: spin 1s linear infinite;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25;"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path>
+                        </svg>
                     </button>
+                    <div class="timer-badge">
+                        <span class="ping-dot"></span>
+                        <span class="timer-text">00:00</span>
+                    </div>
                 </div>
 
                 <div class="form-group" id="group-blockers">
@@ -80,16 +94,23 @@
                         style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem; display: block;">Critical
                         Blockers</label>
                     <textarea name="blockers" id="blockers" placeholder="Any issues faced?" rows="3"></textarea>
-                    <div class="timer-badge">00:00</div>
                     <button type="button" class="mic-btn" onclick="handleMicClick('blockers', this)">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        <svg class="mic-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                             <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
                             <line x1="12" x2="12" y1="19" y2="22" />
                             <line x1="8" x2="16" y1="22" y2="22" />
                         </svg>
+                        <svg class="spinner-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="20" height="20" style="display: none; animation: spin 1s linear infinite;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" style="opacity: 0.25;"></circle>
+                            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" style="opacity: 0.75;"></path>
+                        </svg>
                     </button>
+                    <div class="timer-badge">
+                        <span class="ping-dot"></span>
+                        <span class="timer-text">00:00</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -136,6 +157,7 @@
             let audioChunks = [];
             let startTime;
             let timerInterval;
+            let baseText = '';
 
             function initWebSpeech() {
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -152,12 +174,16 @@
                     if (!activeInputId) return;
                     const input = document.getElementById(activeInputId);
                     let finalTranscript = '';
-                    for (let i = e.resultIndex; i < e.results.length; ++i) {
-                        if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+                    let interimTranscript = '';
+                    for (let i = 0; i < e.results.length; ++i) {
+                        if (e.results[i].isFinal) {
+                            finalTranscript += e.results[i][0].transcript;
+                        } else {
+                            interimTranscript += e.results[i][0].transcript;
+                        }
                     }
-                    if (finalTranscript) {
-                        input.value += (input.value ? ' ' : '') + finalTranscript;
-                    }
+                    const currentSpeech = finalTranscript + interimTranscript;
+                    input.value = baseText + (baseText && currentSpeech ? ' ' : '') + currentSpeech;
                 };
 
                 recognition.onerror = (e) => {
@@ -213,17 +239,36 @@
                     webRecognition = initWebSpeech();
                 }
 
-                if (!webRecognition) return;
+                if (!webRecognition) {
+                    alert("Web Speech API is not supported in this browser. Please switch to 'FASTER-WHISPER AI' mode or use a Chromium-based browser like Google Chrome.");
+                    return;
+                }
 
                 activeInputId = inputId;
                 activeBtn = btn;
                 btn.classList.add('is-listening');
 
+                const input = document.getElementById(inputId);
+                baseText = input ? input.value : '';
+
+                // Start timer display
+                startTime = Date.now();
+                const timerBadge = btn.parentElement.querySelector('.timer-badge');
+                const timerText = timerBadge ? (timerBadge.querySelector('.timer-text') || timerBadge) : null;
+                if (timerText) {
+                    timerText.innerText = "00:00";
+                    timerInterval = setInterval(() => {
+                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                        const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                        const s = (elapsed % 60).toString().padStart(2, '0');
+                        timerText.innerText = `${m}:${s}`;
+                    }, 1000);
+                }
+
                 try {
                     webRecognition.start();
                 } catch (err) {
                     console.error("Failed to start speech recognition:", err);
-                    // If it was already running, stop it and try again
                     stopWebSpeech();
                     setTimeout(() => startWebSession(inputId, btn), 100);
                 }
@@ -232,6 +277,7 @@
             function stopWebSpeech() {
                 if (activeBtn) activeBtn.classList.remove('is-listening');
                 if (webRecognition) webRecognition.stop();
+                clearInterval(timerInterval);
                 activeInputId = null;
                 activeBtn = null;
             }
@@ -248,13 +294,17 @@
                     mediaRecorder.start();
                     btn.classList.add('is-listening');
                     startTime = Date.now();
-                    const timerDisplay = btn.parentElement.querySelector('.timer-badge');
-                    timerInterval = setInterval(() => {
-                        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                        const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
-                        const s = (elapsed % 60).toString().padStart(2, '0');
-                        timerDisplay.innerText = `${m}:${s}`;
-                    }, 1000);
+                    const timerBadge = btn.parentElement.querySelector('.timer-badge');
+                    const timerText = timerBadge ? (timerBadge.querySelector('.timer-text') || timerBadge) : null;
+                    if (timerText) {
+                        timerText.innerText = "00:00";
+                        timerInterval = setInterval(() => {
+                            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                            const m = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                            const s = (elapsed % 60).toString().padStart(2, '0');
+                            timerText.innerText = `${m}:${s}`;
+                        }, 1000);
+                    }
                 } catch (err) { alert("Mic denied."); }
             }
 
@@ -268,14 +318,35 @@
             async function processWhisperAudio() {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 const input = document.getElementById(activeInputId);
+                const btn = activeBtn;
+                if (!input || !btn) return;
+
+                const timerBadge = btn.parentElement.querySelector('.timer-badge');
+                const timerText = timerBadge ? (timerBadge.querySelector('.timer-text') || timerBadge) : null;
+
+                // Add processing class to textarea and button
+                btn.classList.add('is-processing');
+                input.classList.add('stt-processing');
+                if (timerText) {
+                    timerText.innerText = 'Processing...';
+                }
+
                 const formData = new FormData();
                 formData.append('file', audioBlob, 'rec.wav');
                 try {
                     const res = await fetch('http://localhost:8001/api/v1/transcribe/', { method: 'POST', body: formData });
                     const data = await res.json();
                     if (data.transcription) input.value += (input.value ? ' ' : '') + data.transcription;
-                } catch (e) { console.error(e); }
-                finally { activeInputId = null; activeBtn = null; }
+                } catch (e) {
+                    console.error("Whisper Transcription Error:", e);
+                    alert("Whisper server is unreachable. Please make sure the Whisper service is running on port 8001.");
+                }
+                finally {
+                    btn.classList.remove('is-processing');
+                    input.classList.remove('stt-processing');
+                    activeInputId = null;
+                    activeBtn = null;
+                }
             }
         </script>
 </x-layout>

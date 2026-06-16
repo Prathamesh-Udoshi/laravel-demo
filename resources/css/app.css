@@ -146,6 +146,33 @@ textarea+.mic-btn {
     color: white;
     background: #ef4444;
     border-color: #ef4444;
+    animation: mic-pulse 1.5s infinite;
+}
+
+.mic-btn.is-processing {
+    pointer-events: none;
+    background: var(--border);
+    color: var(--text-muted);
+}
+
+.mic-btn.is-processing .mic-icon {
+    display: none !important;
+}
+
+.mic-btn.is-processing .spinner-icon {
+    display: block !important;
+}
+
+@keyframes mic-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
 }
 
 /* Buttons - Flat & Bold */
@@ -203,13 +230,46 @@ button:hover {
     font-size: 0.9rem;
     font-weight: 800;
     color: #ef4444;
-    padding: 4px 8px;
+    padding: 6px 12px;
     border: 2px solid #ef4444;
+    background: rgba(239, 68, 68, 0.05);
     display: none;
+    align-items: center;
+    gap: 6px;
+    border-radius: 4px;
+    z-index: 10;
 }
 
-.mic-btn.is-listening~.timer-badge {
-    display: block;
+textarea ~ .timer-badge {
+    top: 2rem;
+}
+
+.mic-btn.is-listening ~ .timer-badge,
+.mic-btn.is-processing ~ .timer-badge {
+    display: inline-flex;
+}
+
+.ping-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    animation: pulse-dot 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
 }
 
 /* STT Toggle */
