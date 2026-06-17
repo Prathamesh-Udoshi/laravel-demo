@@ -35,14 +35,61 @@ class TutorChatController extends Controller
 
         $question = $request->input('message');
         $courseId = $request->input('course_id');
+        $conversationId = $request->input('conversation_id');
 
-        // 1. Retrieve matching chunks using the custom semantic search (with pgvector/PHP fallback)
+        $searchQuery = $question;
+
+        // 0. If this is an ongoing conversation, condense the question based on previous messages to optimize RAG retrieval
+        if ($conversationId) {
+            try {
+                $messages = \Illuminate\Support\Facades\DB::table('agent_conversation_messages')
+                    ->where('conversation_id', $conversationId)
+                    ->orderBy('id', 'desc')
+                    ->limit(6)
+                    ->get()
+                    ->reverse();
+
+                if ($messages->isNotEmpty()) {
+                    $historyText = $messages->map(function ($m) {
+                        $role = $m->role === 'user' ? 'User' : 'Assistant';
+                        return "{$role}: {$m->content}";
+                    })->join("\n");
+
+                    // Use App\Support\AI to optimize the query
+                    $condenser = \App\Support\AI::chat(
+                        instructions: "You are a search query optimizer. Given a conversation history and a student follow-up question, rewrite it into a standalone search query containing all necessary keywords and topic context. Return ONLY the final optimized query text. Do not write any conversational preamble."
+                    );
+
+                    $condensedResult = $condenser->prompt(
+                        "CONVERSATION HISTORY:\n{$historyText}\n\nFOLLOW-UP QUESTION: {$question}\n\nSTANDALONE SEARCH QUERY:"
+                    );
+
+                    $optimizedText = trim($condensedResult->text);
+                    if (!empty($optimizedText)) {
+                        $searchQuery = $optimizedText;
+                    }
+                }
+            } catch (\Exception $e) {
+                logger()->warning('RAG Query Condenser Error: ' . $e->getMessage());
+            }
+        }
+
+        // 1. Retrieve a larger candidate pool of matching chunks using semantic search
         $chunks = WeeklyContentChunk::searchSimilar(
-            query: $question,
-            minSimilarity: 0.22,
-            limit: 3,
+            query: $searchQuery,
+            minSimilarity: 0.15,
+            limit: 15,
             courseId: $courseId
         );
+
+        // 2. Rerank the matching chunks to extract the top 3 most relevant context blocks using Jina
+        if ($chunks->isNotEmpty()) {
+            $chunks = $chunks->rerank(
+                by: 'content',
+                query: $searchQuery,
+                limit: 3
+            );
+        }
 
         // 3. Construct context block for the RAG agent
         $context = '';
@@ -65,8 +112,6 @@ class TutorChatController extends Controller
         // 5. Invoke the AI Tutor Agent with the contextual transcript notes
         $agent = new LectureTutor();
         $agent->setLectureContext($context);
-
-        $conversationId = $request->input('conversation_id');
 
         try {
             if ($conversationId) {

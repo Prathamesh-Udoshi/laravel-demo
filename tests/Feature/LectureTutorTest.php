@@ -5,6 +5,7 @@ use App\Models\WeeklyContent;
 use App\Models\WeeklyContentChunk;
 use App\Ai\Agents\LectureTutor;
 use Laravel\Ai\Embeddings;
+use Laravel\Ai\Reranking;
 use Laravel\Ai\Gateway\FakeEmbeddingGateway;
 use Illuminate\Support\Str;
 
@@ -133,4 +134,38 @@ test('searchSimilar correctly filters by course ID', function () {
     expect($results)->not->toBeEmpty();
     expect($results->count())->toBe(1);
     expect($results->first()->weeklyContent->course_id)->toBe($courseA->id);
+});
+
+test('tutor chat endpoint returns successfully with reranking', function () {
+    // Fake dependencies to prevent external HTTP hits during tests
+    Embeddings::fake();
+    Reranking::fake();
+    LectureTutor::fake();
+
+    $course = Course::create(['title' => 'Tutor Course', 'description' => 'SQL', 'duration_weeks' => 1]);
+    $content = WeeklyContent::withoutEvents(fn() => WeeklyContent::create([
+        'course_id' => $course->id,
+        'week_number' => 1,
+        'video_title' => 'Eloquent Model',
+        'transcript_or_notes' => 'Eloquent is an ActiveRecord ORM in Laravel.',
+    ]));
+
+    $chunk = WeeklyContentChunk::create([
+        'weekly_content_id' => $content->id,
+        'chunk_index' => 0,
+        'content' => 'Eloquent is an ActiveRecord ORM in Laravel.',
+        'embedding' => array_fill(0, 3072, 0.1), // Dummy embedding vector matching model requirement
+    ]);
+
+    $response = $this->postJson('/tutor/chat', [
+        'message' => 'What is Eloquent?',
+        'course_id' => $course->id,
+    ]);
+
+    $response->assertStatus(200);
+    $response->assertJsonStructure([
+        'reply',
+        'conversation_id',
+        'context_used',
+    ]);
 });
