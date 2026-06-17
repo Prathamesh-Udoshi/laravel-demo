@@ -18,7 +18,7 @@
             </h1>
             
             <p style="font-size: 1.25rem; max-width: 750px; margin-bottom: 3.5rem; color: var(--text-muted); font-weight: 500; line-height: 1.6;">
-                Welcome to your unified AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, and students directory records.
+                Welcome to your unified AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, payload-intercepted context inspectors, and students directory records.
             </p>
             
             <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
@@ -39,7 +39,7 @@
                 Workspace Modules
             </h2>
             <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.05rem; font-weight: 500;">
-                Discover and access all five segregated productivity engines currently running inside your application.
+                Discover and access all six segregated productivity engines currently running inside your application.
             </p>
         </div>
 
@@ -161,6 +161,30 @@
                 
                 <a href="/tutor" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">
                     Launch AI Tutor
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+
+            <!-- Card 6: AI Context & Payload Inspector -->
+            <div class="card animate-fade-in" style="margin-bottom: 0; padding: 3rem; display: flex; flex-direction: column; height: 100%; border-top: 4px solid #8b5cf6; transition: all 0.3s ease;">
+                <div style="width: 54px; height: 54px; background: rgba(139, 92, 246, 0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.75rem; color: #8b5cf6;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
+                
+                <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem; font-family: 'Outfit', sans-serif;">
+                    AI Context & Payload Inspector
+                </h3>
+                
+                <p style="color: var(--text-muted); font-size: 0.975rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1;">
+                    Trace outbound LLM HTTP requests and responses in real-time. Learn how thread-safe request-scoped metadata is tracked internally via Laravel's <strong>Context</strong> facade while system context instructions guide the model's behavior.
+                </p>
+
+                <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-left: 3px solid #8b5cf6; font-size: 0.85rem; font-family: monospace; color: #475569; margin-bottom: 2rem;">
+                    <strong>API Tech:</strong> Laravel Context • Outbound Event Interceptors • Groq / Gemini
+                </div>
+                
+                <a href="/ai-context-inspector" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">
+                    Launch Context Inspector
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
             </div>

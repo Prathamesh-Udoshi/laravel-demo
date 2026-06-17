@@ -43,6 +43,11 @@ An experiment in Retrieval-Augmented Generation (RAG) and local semantic search 
 * **Vector Fallback Engine**: If pgvector extension is not installed (common on local Windows setups), the system catches the query exception and dynamically falls back to computing cosine similarity mathematically inside PHP, keeping search fully functional.
 * **Where to find it**: Access it at `/tutor` (configured via [TutorChatController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TutorChatController.php) and routes in `routes/web.php`).
 
+### 8. AI Context & Payload Inspector
+An experiment in tracing Laravel thread-safe request-scoped metadata and intercepting outbound HTTP API payloads.
+* **What it does**: Allows developers to input custom variables into Laravel's `Context` store and system context instructions. When prompts are sent to Groq or Gemini, request-scoped listener hooks intercept and display outbound HTTP payload JSON details (request/response headers and bodies, with credentials masked) alongside the local context.
+* **Where to find it**: Access it at `/ai-context-inspector` (configured via [AIContextController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/AIContextController.php) and routes in `routes/web.php`).
+
 ---
 
 ## 🛠️ Stack & Technologies Used
