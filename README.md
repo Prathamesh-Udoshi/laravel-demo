@@ -48,6 +48,11 @@ An experiment in tracing Laravel thread-safe request-scoped metadata and interce
 * **What it does**: Allows developers to input custom variables into Laravel's `Context` store and system context instructions. When prompts are sent to Groq or Gemini, request-scoped listener hooks intercept and display outbound HTTP payload JSON details (request/response headers and bodies, with credentials masked) alongside the local context.
 * **Where to find it**: Access it at `/ai-context-inspector` (configured via [AIContextController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/AIContextController.php) and routes in `routes/web.php`).
 
+### 9. AI Email Reminder Agent
+An experiment in generating highly personalized completion reminders using database state and LLM instructions.
+* **What it does**: Tracks student enrollments, completion percentage, and last reminded timestamps. When triggered manually or run via background sweeps, an AI agent compiles progress metrics into a personalized email copy designed to motivate the student. The compiled reminder is dispatched using Laravel Mailable envelopes.
+* **Where to find it**: Access it at `/email-agent` (configured via [EmailAgentController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/EmailAgentController.php) and routes in `routes/web.php`).
+
 ---
 
 ## 🛠️ Stack & Technologies Used

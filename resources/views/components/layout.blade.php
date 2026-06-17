@@ -195,37 +195,43 @@
                 <li>
                     <a href="/courses" class="nav-link {{ str_starts_with($currentUri, '/courses') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
-                        Course Planner
+                        Planner
                     </a>
                 </li>
                 <li>
                     <a href="/analyze" class="nav-link {{ str_starts_with($currentUri, '/analyze') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                        STT Work Diary
+                        Diary
                     </a>
                 </li>
                 <li>
                     <a href="/tweet-generator" class="nav-link {{ str_starts_with($currentUri, '/tweet-generator') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-                        Tweet Composer
+                        Tweets
                     </a>
                 </li>
                 <li>
                     <a href="/ai-context-inspector" class="nav-link {{ str_starts_with($currentUri, '/ai-context-inspector') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        Context Inspector
+                        Inspector
+                    </a>
+                </li>
+                <li>
+                    <a href="/email-agent" class="nav-link {{ str_starts_with($currentUri, '/email-agent') ? 'active' : '' }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                        Emails
                     </a>
                 </li>
                 <li>
                     <a href="/tutor" class="nav-link {{ str_starts_with($currentUri, '/tutor') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        Lecture Tutor
+                        Tutor
                     </a>
                 </li>
                 <li>
                     <a href="/sample" class="nav-link {{ str_starts_with($currentUri, '/sample') ? 'active' : '' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        Student Directory
+                        Students
                     </a>
                 </li>
             </ul>
@@ -247,6 +253,7 @@
                 <a href="/tweet-generator">Tweet Composer</a>
                 <a href="/tutor">Lecture Tutor</a>
                 <a href="/ai-context-inspector">Context Inspector</a>
+                <a href="/email-agent">Email Agent</a>
             </div>
         </div>
     </footer>

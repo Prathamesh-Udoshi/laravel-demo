@@ -18,7 +18,7 @@
             </h1>
             
             <p style="font-size: 1.25rem; max-width: 750px; margin-bottom: 3.5rem; color: var(--text-muted); font-weight: 500; line-height: 1.6;">
-                Welcome to your unified AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, payload-intercepted context inspectors, and students directory records.
+                Welcome to your unified AI command center. Seamlessly jump between playlist-scaffolded syllabus planners, voice-enabled diary analysis, AI tweet writers, payload-intercepted context inspectors, automated email agents, and students directory records.
             </p>
             
             <div style="display: flex; gap: 1.25rem; flex-wrap: wrap;">
@@ -39,7 +39,7 @@
                 Workspace Modules
             </h2>
             <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.05rem; font-weight: 500;">
-                Discover and access all six segregated productivity engines currently running inside your application.
+                Discover and access all seven segregated productivity engines currently running inside your application.
             </p>
         </div>
 
@@ -185,6 +185,30 @@
                 
                 <a href="/ai-context-inspector" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">
                     Launch Context Inspector
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+            </div>
+
+            <!-- Card 7: AI Email Reminder Agent -->
+            <div class="card animate-fade-in" style="margin-bottom: 0; padding: 3rem; display: flex; flex-direction: column; height: 100%; border-top: 4px solid #f59e0b; transition: all 0.3s ease;">
+                <div style="width: 54px; height: 54px; background: rgba(245, 158, 11, 0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.75rem; color: #f59e0b;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                </div>
+                
+                <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.75rem; font-family: 'Outfit', sans-serif;">
+                    AI Email Reminder Agent
+                </h3>
+                
+                <p style="color: var(--text-muted); font-size: 0.975rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1;">
+                    Generate highly personalized, motivational completion reminder emails for students based on their course details and real-time progress. Includes a control panel to dispatch reminders manually or run background sweep tasks.
+                </p>
+
+                <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-left: 3px solid #f59e0b; font-size: 0.85rem; font-family: monospace; color: #475569; margin-bottom: 2rem;">
+                    <strong>API Tech:</strong> Laravel Mail • AI Prompt Engineering • Scheduler Sweeper
+                </div>
+                
+                <a href="/email-agent" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">
+                    Launch Email Agent
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </a>
             </div>
