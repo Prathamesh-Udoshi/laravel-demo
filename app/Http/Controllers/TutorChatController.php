@@ -25,7 +25,7 @@ class TutorChatController extends Controller
     /**
      * Handle the chat interaction.
      */
-    public function chat(Request $request): JsonResponse
+    public function chat(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         $request->validate([
             'message' => 'required|string',
@@ -113,31 +113,51 @@ class TutorChatController extends Controller
         $agent = new LectureTutor();
         $agent->setLectureContext($context);
 
-        try {
-            if ($conversationId) {
-                $response = $agent->continue($conversationId, as: $user)->prompt($question);
-            } else {
-                $response = $agent->forUser($user)->prompt($question);
-                $conversationId = $response->conversationId;
+        $streamable = $conversationId 
+            ? $agent->continue($conversationId, as: $user)->stream($question)
+            : $agent->forUser($user)->stream($question);
+
+        return response()->stream(function () use ($streamable, $chunks) {
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+            flush();
+
+            // Send metadata packet containing RAG context
+            echo "data: " . json_encode([
+                'type' => 'metadata',
+                'conversation_id' => $streamable->conversationId,
+                'context_used' => $chunks->map(fn ($c) => [
+                    'course' => $c->weeklyContent->course->title ?? 'Unknown',
+                    'week' => $c->weeklyContent->week_number ?? 0,
+                    'lesson' => $c->weeklyContent->video_title ?? 'Lesson',
+                    'snippet' => substr($c->content, 0, 150) . '...',
+                    'similarity' => isset($c->similarity) ? round($c->similarity, 3) : 'SQL Search',
+                ])->toArray()
+            ]) . "\n\n";
+
+            if (ob_get_level() > 0) ob_flush();
+            flush();
+
+            // Stream text delta tokens
+            foreach ($streamable as $event) {
+                if ($event->type() === 'text_delta') {
+                    echo "data: " . json_encode([
+                        'type' => 'text_delta',
+                        'text' => $event->delta
+                    ]) . "\n\n";
+
+                    if (ob_get_level() > 0) ob_flush();
+                    flush();
+                }
             }
 
-            $reply = $response->text;
-        } catch (\Exception $e) {
-            logger()->error('Tutor Chat Agent Error: ' . $e->getMessage());
-            $reply = "I'm sorry, I encountered an error when communicating with the AI service. Details: " . $e->getMessage();
-        }
-
-        // 6. Return response + JSON details of what context was referenced
-        return response()->json([
-            'reply' => $reply,
-            'conversation_id' => $conversationId,
-            'context_used' => $chunks->map(fn ($c) => [
-                'course' => $c->weeklyContent->course->title ?? 'Unknown',
-                'week' => $c->weeklyContent->week_number ?? 0,
-                'lesson' => $c->weeklyContent->video_title ?? 'Lesson',
-                'snippet' => substr($c->content, 0, 150) . '...',
-                'similarity' => isset($c->similarity) ? round($c->similarity, 3) : 'SQL Search',
-            ]),
+            echo "data: [DONE]\n\n";
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
         ]);
     }
 }

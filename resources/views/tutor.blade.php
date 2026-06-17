@@ -119,6 +119,11 @@
             border-color: var(--primary) !important;
         }
 
+        .bubble {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
         .chat-msg-user {
             display: flex;
             justify-content: flex-end;
@@ -223,8 +228,10 @@
             
             // Basic formatting for Markdown style pre blocks and code inline
             let formattedText = text
+                .replace(/```([a-z]*)\n([\s\S]+?)\n```/g, '<pre><code>$2</code></pre>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
-                .replace(/```([a-z]*)\n([\s\S]+?)\n```/g, '<pre><code>$2</code></pre>');
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em>$1</em>');
                 
             bubble.innerHTML = formattedText;
             row.appendChild(bubble);
@@ -317,18 +324,68 @@
                     throw new Error('Network response error');
                 }
 
-                const data = await response.json();
-                
                 removeTypingIndicator();
-                
-                // Print response
-                appendMessage('assistant', data.reply);
-                
-                // Store conversation state
-                conversationId = data.conversation_id;
-                
-                // Show logs
-                updateInspector(data.context_used);
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let assistantBubble = null;
+                let assistantBubbleText = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // keep last incomplete line
+
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed) continue;
+
+                        if (trimmed.startsWith('data: ')) {
+                            const dataStr = trimmed.slice(6);
+                            if (dataStr === '[DONE]') {
+                                break;
+                            }
+
+                            try {
+                                const parsed = JSON.parse(dataStr);
+                                if (parsed.type === 'metadata') {
+                                    conversationId = parsed.conversation_id;
+                                    updateInspector(parsed.context_used);
+                                } else if (parsed.type === 'text_delta') {
+                                    if (!assistantBubble) {
+                                        const container = document.getElementById('messagesContainer');
+                                        const row = document.createElement('div');
+                                        row.className = 'chat-msg-assistant';
+                                        
+                                        assistantBubble = document.createElement('div');
+                                        assistantBubble.className = 'bubble';
+                                        row.appendChild(assistantBubble);
+                                        container.appendChild(row);
+                                    }
+
+                                    assistantBubbleText += parsed.text;
+
+                                    let formattedText = assistantBubbleText
+                                        .replace(/```([a-z]*)\n([\s\S]+?)\n```/g, '<pre><code>$2</code></pre>')
+                                        .replace(/`([^`]+)`/g, '<code>$1</code>')
+                                        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                                        .replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+                                    assistantBubble.innerHTML = formattedText;
+                                    
+                                    const container = document.getElementById('messagesContainer');
+                                    container.scrollTop = container.scrollHeight;
+                                }
+                            } catch (e) {
+                                console.error('Error parsing stream chunk:', e);
+                            }
+                        }
+                    }
+                }
 
             } catch (error) {
                 console.error(error);

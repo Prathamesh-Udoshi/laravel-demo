@@ -157,15 +157,16 @@ test('tutor chat endpoint returns successfully with reranking', function () {
         'embedding' => array_fill(0, 3072, 0.1), // Dummy embedding vector matching model requirement
     ]);
 
-    $response = $this->postJson('/tutor/chat', [
+    $response = $this->post('/tutor/chat', [
         'message' => 'What is Eloquent?',
         'course_id' => $course->id,
     ]);
 
     $response->assertStatus(200);
-    $response->assertJsonStructure([
-        'reply',
-        'conversation_id',
-        'context_used',
-    ]);
+    $response->assertHeader('Content-Type', 'text/event-stream; charset=UTF-8');
+
+    $content = $response->streamedContent();
+    expect($content)->toContain('data: {"type":"metadata"');
+    expect($content)->toContain('data: {"type":"text_delta"');
+    expect($content)->toContain('data: [DONE]');
 });
