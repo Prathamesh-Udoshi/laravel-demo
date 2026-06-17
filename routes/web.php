@@ -75,3 +75,12 @@ Route::post('/ai-context-inspector/send', [AIContextController::class, 'send'])-
 use App\Http\Controllers\TutorChatController;
 Route::get('/tutor', [TutorChatController::class, 'index'])->name('tutor.index');
 Route::post('/tutor/chat', [TutorChatController::class, 'chat'])->name('tutor.chat');
+
+use App\Http\Controllers\EmailAgentController;
+
+// AI Email Agent Routes
+Route::prefix('email-agent')->group(function () {
+    Route::get('/', [EmailAgentController::class, 'index'])->name('email-agent.index');
+    Route::post('/enroll', [EmailAgentController::class, 'enroll'])->name('email-agent.enroll');
+    Route::post('/send-reminder', [EmailAgentController::class, 'sendReminder'])->name('email-agent.send-reminder');
+});

@@ -13,7 +13,15 @@ class Student extends Model
 
     protected $fillable = [
         'name',
-        'class'
+        'class',
+        'email'
     ];
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'course_student')
+                    ->withPivot('progress_percent', 'completed_at', 'last_reminded_at')
+                    ->withTimestamps();
+    }   
 }
 

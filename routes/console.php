@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Artisan;
 
 use App\Ai\Agents\TweetGenerator;
 use Laravel\Ai\Messages\UserMessage;
+use Illuminate\Support\Facades\Schedule;
+
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -19,3 +21,8 @@ Artisan::command('ai:tweet {topic}', function
 
     $this->comment("\n" . $response);
 })->purpose('Ask AI Agent to draft a tweet about a topic');
+
+
+// Run the AI email reminder sweeps weekly
+Schedule::command('app:send-weekly-course-reminders')->weekly();
+

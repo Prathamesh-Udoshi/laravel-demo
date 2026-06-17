@@ -39,4 +39,11 @@ class Course extends Model
     {
         return $this->hasMany(Assignment::class);
     }
+
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'course_student')
+                    ->withPivot('progress_percent', 'completed_at', 'last_reminded_at')
+                    ->withTimestamps();
+    }       
 }
