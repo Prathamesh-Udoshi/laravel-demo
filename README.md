@@ -86,20 +86,16 @@ An experiment in generating highly personalized completion reminders using datab
    ```
 
 4. **Vectorize Transcripts and Process Background Jobs**:
-   When new courses are created or weeks are processed, transcripts are chunked and vectorized using Laravel background jobs. You can run or process these manually:
-   * **Start the queue worker manually** to process queued embedding jobs in the background:
-     ```bash
-     php artisan queue:work
-     # or
-     php artisan queue:listen
-     ```
-   * **Force run vectorization on all transcripts synchronously** at once:
-     ```bash
-     php artisan app:chunk-transcripts
-     ```
+   By default, the Course Planner chunks and generates vector embeddings **synchronously on-the-fly** during week-processing requests (via `ChunkWeeklyContentJob::dispatchSync`). This ensures that vector chunks are immediately indexed in the database and available to the RAG Tutor dashboard without requiring a running queue worker.
+   
+   If you have legacy courses or need to force-regenerate vector chunks for all existing course materials at once, you can run the console command:
+   ```bash
+   php artisan app:chunk-transcripts
+   ```
 
 5. **Start the local server**:
+   If you are running the server locally, you can start Vite and the server together:
    ```bash
    npm run dev
    ```
-   *(This runs the PHP server, Vite assets, and the queue listener concurrently. If you run your server through Laravel Herd, make sure to either start the queue worker manually as shown in step 4, or set `QUEUE_CONNECTION=sync` in your `.env` to process jobs instantly).*
+   *(If you run your server through Laravel Herd, the app is instantly available at http://myapp.test/courses)*
