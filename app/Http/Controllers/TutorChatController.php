@@ -158,4 +158,32 @@ class TutorChatController extends Controller
             'X-Accel-Buffering' => 'no',
         ]);
     }
+
+    /**
+     * Synthesize text to speech dynamically without saving files.
+     */
+    public function speak(Request $request): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'text' => 'required|string',
+        ]);
+
+        $text = $request->input('text');
+        
+        // Remove markdown elements for cleaner pronunciation
+        $cleanText = preg_replace('/[*_`~#\-]/', '', $text);
+
+        try {
+            // Generate raw audio from the text
+            $audio = \Laravel\Ai\Audio::of($cleanText)->generate();
+            
+            return response((string) $audio)
+                ->header('Content-Type', 'audio/mpeg');
+        } catch (\Exception $e) {
+            logger()->warning("TTS failed: " . $e->getMessage());
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

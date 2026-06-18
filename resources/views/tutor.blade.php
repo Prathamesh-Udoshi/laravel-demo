@@ -70,6 +70,24 @@
         <!-- Right: AI Chat Interface -->
         <div class="card" style="padding: 2.5rem; margin-bottom: 0; display: flex; flex-direction: column; height: 600px; border-top: 4px solid var(--accent);">
             
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 0; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>💬</span> Tutor Chat
+                </h3>
+                <button id="voiceToggleBtn" onclick="toggleVoice()" class="btn" style="padding: 0.5rem 0.75rem; background: #ffffff; border: 2px solid var(--border); color: var(--text-muted); font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.2s;">
+                    <svg id="voiceOnIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg id="voiceOffIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <line x1="23" y1="9" x2="17" y2="15"></line>
+                        <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                    <span id="voiceToggleText">Voice Off</span>
+                </button>
+            </div>
+
             <!-- Messages Box -->
             <div id="messagesContainer" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem; padding-right: 0.5rem; margin-bottom: 1.5rem;">
                 <!-- System Greeting -->
@@ -211,6 +229,68 @@
     <script>
         let activeCourseId = '';
         let conversationId = null;
+        let voiceEnabled = false;
+
+        function toggleVoice() {
+            voiceEnabled = !voiceEnabled;
+            const onIcon = document.getElementById('voiceOnIcon');
+            const offIcon = document.getElementById('voiceOffIcon');
+            const toggleText = document.getElementById('voiceToggleText');
+            const btn = document.getElementById('voiceToggleBtn');
+
+            if (voiceEnabled) {
+                onIcon.style.display = 'block';
+                offIcon.style.display = 'none';
+                toggleText.innerText = 'Voice On';
+                btn.style.borderColor = 'var(--primary)';
+                btn.style.color = 'var(--primary)';
+            } else {
+                onIcon.style.display = 'none';
+                offIcon.style.display = 'block';
+                toggleText.innerText = 'Voice Off';
+                btn.style.borderColor = 'var(--border)';
+                btn.style.color = 'var(--text-muted)';
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function cleanTextForSpeech(text) {
+            // Remove code blocks entirely since they are annoying to read
+            let clean = text.replace(/```[\s\S]*?```/g, '');
+            // Remove inline code backticks
+            clean = clean.replace(/`([^`]+)`/g, '$1');
+            // Remove markdown syntax characters
+            clean = clean.replace(/[*_#\-~>]/g, '');
+            // Remove HTML tags
+            clean = clean.replace(/<\/?[^>]+(>|$)/g, '');
+            // Normalize spacing
+            clean = clean.replace(/\s+/g, ' ').trim();
+            return clean;
+        }
+
+        function playTutorAudio(text) {
+            if (!voiceEnabled || !text) return;
+
+            // Cancel any ongoing speech synthesis
+            window.speechSynthesis.cancel();
+
+            const cleanText = cleanTextForSpeech(text);
+            if (!cleanText) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+
+            // Attempt to choose an English voice
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Google')) ||
+                                   voices.find(v => v.lang.startsWith('en') && v.name.includes('Natural')) ||
+                                   voices.find(v => v.lang.startsWith('en-US')) ||
+                                   voices.find(v => v.lang.startsWith('en'));
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
 
         function selectCourse(btn, courseId) {
             document.querySelectorAll('.course-btn').forEach(b => b.classList.remove('active'));
@@ -300,6 +380,9 @@
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
 
+            // Stop any currently playing speech when new message is sent
+            window.speechSynthesis.cancel();
+
             // Append user query in chat
             appendMessage('user', message);
             
@@ -385,6 +468,11 @@
                             }
                         }
                     }
+                }
+
+                // If voice is enabled and we have accumulated the tutor response, play it
+                if (voiceEnabled && assistantBubbleText) {
+                    playTutorAudio(assistantBubbleText);
                 }
 
             } catch (error) {

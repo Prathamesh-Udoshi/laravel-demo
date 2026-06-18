@@ -76,6 +76,7 @@ Route::post('/ai-context-inspector/send', [AIContextController::class, 'send'])-
 use App\Http\Controllers\TutorChatController;
 Route::get('/tutor', [TutorChatController::class, 'index'])->name('tutor.index');
 Route::post('/tutor/chat', [TutorChatController::class, 'chat'])->name('tutor.chat');
+Route::post('/tutor/speak', [TutorChatController::class, 'speak'])->name('tutor.speak');
 
 use App\Http\Controllers\EmailAgentController;
 
