@@ -14,7 +14,7 @@ class WeeklyContentObserver
     {
         // Only trigger embedding chunking if transcript/notes or summary changed
         if ($weeklyContent->wasChanged('transcript_or_notes') || $weeklyContent->wasChanged('summary') || $weeklyContent->wasRecentlyCreated) {
-            ChunkWeeklyContentJob::dispatch($weeklyContent);
+            ChunkWeeklyContentJob::dispatchSync($weeklyContent);
         }
     }
 }

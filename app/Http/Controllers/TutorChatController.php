@@ -27,6 +27,8 @@ class TutorChatController extends Controller
      */
     public function chat(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
+        @set_time_limit(0);
+
         $request->validate([
             'message' => 'required|string',
             'course_id' => 'nullable|integer',

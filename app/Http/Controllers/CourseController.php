@@ -127,6 +127,7 @@ class CourseController extends Controller
      */
     public function processWeek(Request $request, $courseId, $weekNumber)
     {
+        @set_time_limit(0);
         try {
             $lectures = WeeklyContent::where('course_id', $courseId)->where('week_number', $weekNumber)->get();
 
@@ -155,7 +156,8 @@ class CourseController extends Controller
                 }
 
                 // Fallback summary generation if transcript is null
-                $summary = $this->aiService->summarizeWeek($weekNumber, $lecture->video_title, $transcript);
+                $courseTitle = $lecture->course->title ?? null;
+                $summary = $this->aiService->summarizeWeek($weekNumber, $lecture->video_title, $transcript, $courseTitle);
 
                 $lecture->update([
                     'summary' => $summary,
@@ -331,5 +333,45 @@ class CourseController extends Controller
         
         return response()->json($course)
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    /**
+     * Delete the course and all associated contents.
+     */
+    public function destroy($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $course = Course::findOrFail($id);
+
+            // 1. Detach students
+            $course->students()->detach();
+
+            // 2. Delete assignments
+            $course->assignments()->delete();
+
+            // 3. Delete quiz questions
+            $course->quizQuestions()->delete();
+
+            // 4. Delete weekly content chunks and weekly contents
+            foreach ($course->weeklyContents as $content) {
+                $content->chunks()->delete();
+                $content->delete();
+            }
+
+            // 5. Delete the course itself
+            $course->delete();
+
+            DB::commit();
+
+            return redirect()->route('courses.index')
+                ->with('success', 'Course and all associated weekly contents, assessments, and chunks successfully deleted!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Failed to delete course {$id}: " . $e->getMessage());
+            return redirect()->back()->with('error', 'Error deleting course: ' . $e->getMessage());
+        }
     }
 }

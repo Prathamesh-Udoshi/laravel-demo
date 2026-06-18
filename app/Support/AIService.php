@@ -18,13 +18,15 @@ class AIService
     /**
      * Summarize a single weekly transcript or generate an NPTEL-style curriculum summary if rate-limited.
      */
-    public function summarizeWeek($weekNumber, $lectureTitle, $transcript)
+    public function summarizeWeek($weekNumber, $lectureTitle, $transcript, $courseTitle = null)
     {
+        $courseContext = $courseTitle ? " for the course '{$courseTitle}'" : "";
+
         if (empty($transcript)) {
             $prompt = "You are a senior university professor and expert curriculum designer for Visvesvaraya Technological University (VTU) and NPTEL.
-            I need a highly detailed, academically rigorous summary of this specific lecture: 'Week {$weekNumber} - {$lectureTitle}'.
+            I need a highly detailed, academically rigorous summary of this specific lecture: 'Week {$weekNumber} - {$lectureTitle}'{$courseContext}.
             
-            Based on your extensive knowledge of standard university curricula for this subject, write a dense summary containing 3-4 professional bullet points detailing the core concepts, algorithms, frameworks, or models that are standardly taught in this specific lecture.
+            Based on your extensive knowledge of standard university curricula for this subject, write a dense summary containing 3-4 professional bullet points detailing the core concepts, algorithms, frameworks, or models that are standardly taught in this specific lecture{$courseContext}.
             
             Do NOT mention that a transcript was missing or that this is a placeholder. Write it as a definitive, high-fidelity lecture syllabus summary. Keep it highly educational and under 150 words.";
             
@@ -35,7 +37,7 @@ class AIService
         $trimmedTranscript = substr($transcript, 0, 15000);
 
         $prompt = "You are an expert academic curriculum summarizer. Summarize the following lecture transcript into 3-4 dense, highly educational bullet points detailing the key concepts, algorithms, or theories taught. 
-        Lecture Title: Week {$weekNumber} - {$lectureTitle}
+        Lecture Title: Week {$weekNumber} - {$lectureTitle}{$courseContext}
         
         Transcript:
         {$trimmedTranscript}

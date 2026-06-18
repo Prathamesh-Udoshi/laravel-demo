@@ -49,8 +49,13 @@ class YouTubeService
                     $tabs = $data['contents']['twoColumnBrowseResultsRenderer']['tabs'] ?? [];
                     $contents = [];
                     foreach ($tabs as $tab) {
-                        if (isset($tab['tabRenderer']['content']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents'][0]['playlistVideoListRenderer']['contents'])) {
-                            $contents = $tab['tabRenderer']['content']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents'][0]['playlistVideoListRenderer']['contents'];
+                        $sectionContents = $tab['tabRenderer']['content']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents'] ?? null;
+                        if ($sectionContents) {
+                            if (isset($sectionContents[0]['playlistVideoListRenderer']['contents'])) {
+                                $contents = $sectionContents[0]['playlistVideoListRenderer']['contents'];
+                            } else {
+                                $contents = $sectionContents;
+                            }
                             break;
                         }
                     }
@@ -62,16 +67,24 @@ class YouTubeService
 
                     foreach ($contents as $item) {
                         $videoRenderer = $item['playlistVideoRenderer'] ?? null;
+                        $lockupModel = $item['lockupViewModel'] ?? null;
+
                         if ($videoRenderer) {
                             $videoId = $videoRenderer['videoId'] ?? null;
                             $title = $videoRenderer['title']['runs'][0]['text'] ?? ($videoRenderer['title']['simpleText'] ?? 'Untitled Lecture');
-                            if ($videoId) {
-                                $videos[] = [
-                                    'video_id' => $videoId,
-                                    'title' => $title,
-                                    'url' => 'https://www.youtube.com/watch?v=' . $videoId,
-                                ];
-                            }
+                        } elseif ($lockupModel) {
+                            $videoId = $lockupModel['contentId'] ?? null;
+                            $title = $lockupModel['metadata']['lockupMetadataViewModel']['title']['content'] ?? 'Untitled Lecture';
+                        } else {
+                            continue;
+                        }
+
+                        if ($videoId) {
+                            $videos[] = [
+                                'video_id' => $videoId,
+                                'title' => $title,
+                                'url' => 'https://www.youtube.com/watch?v=' . $videoId,
+                            ];
                         }
                     }
                 } catch (\Exception $e) {
@@ -119,12 +132,16 @@ class YouTubeService
     {
         try {
             $url = "https://www.youtube.com/watch?v=" . $videoId;
-            $response = Http::withoutVerifying()->withHeaders([
+            $headers = [
                 'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept-Language' => 'en-US,en;q=0.9'
-            ])->timeout(10)->get($url);
+                'Accept-Language' => 'en-US,en;q=0.9',
+                'Referer' => $url
+            ];
+
+            $response = Http::withoutVerifying()->withHeaders($headers)->timeout(10)->get($url);
 
             if (!$response->successful()) {
+                logger()->warning("YouTube watch page request failed for video {$videoId} with status: " . $response->status());
                 return null;
             }
 
@@ -133,11 +150,13 @@ class YouTubeService
             // Find captionTracks JSON inside ytPlayerResponse
             preg_match('/"captionTracks":\s*(\[.*?\])/', $html, $matches);
             if (!isset($matches[1])) {
+                logger()->warning("No captionTracks found in YouTube watch page for video {$videoId}");
                 return null;
             }
 
             $captionTracks = json_decode($matches[1], true);
             if (empty($captionTracks)) {
+                logger()->warning("YouTube captionTracks array is empty for video {$videoId}");
                 return null;
             }
 
@@ -155,7 +174,8 @@ class YouTubeService
             }
 
             if ($trackUrl) {
-                $xmlResponse = Http::withoutVerifying()->get($trackUrl);
+                $xmlResponse = Http::withoutVerifying()->withHeaders($headers)->timeout(10)->get($trackUrl);
+                
                 if ($xmlResponse->successful()) {
                     // Parse YouTube caption XML (e.g. <text start="0" dur="2">Hello</text>)
                     $xml = simplexml_load_string($xmlResponse->body());
@@ -164,11 +184,14 @@ class YouTubeService
                         $transcript[] = html_entity_decode((string) $textNode);
                     }
                     return implode(' ', $transcript);
+                } else {
+                    logger()->warning("YouTube timedtext XML fetch failed for video {$videoId} with status: " . $xmlResponse->status() . " (commonly 429 rate limit)");
                 }
             }
 
             return null;
         } catch (\Exception $e) {
+            logger()->error("Exception while fetching YouTube transcript for video {$videoId}: " . $e->getMessage());
             return null;
         }
     }
