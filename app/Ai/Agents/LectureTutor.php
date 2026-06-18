@@ -9,7 +9,7 @@ use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Attributes\Provider;
 use Stringable;
 
-#[Provider('gemini')]
+#[Provider('groq')]
 class LectureTutor implements Agent, Conversational
 {
     use Promptable, RemembersConversations;
@@ -52,6 +52,7 @@ Instructions:
 4. Do NOT use your general knowledge to answer questions that are not supported by the lecture context.
 5. Be friendly, encouraging, and clear.
 6. Include simple code examples or bullet points if it helps explain technical concepts found in the context.
+7. Do NOT use markdown headers (e.g., #, ##, ###) in your response. To structure your answer, use bold text (e.g., **Heading**) or simple bullet points instead.
 PROMPT;
     }
 }

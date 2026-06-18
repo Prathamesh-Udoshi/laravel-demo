@@ -84,13 +84,9 @@ class TutorChatController extends Controller
             courseId: $courseId
         );
 
-        // 2. Rerank the matching chunks to extract the top 3 most relevant context blocks using Jina
+        // 2. Extract the top 3 most relevant context blocks directly (Gemini 3072-dim embeddings are highly accurate)
         if ($chunks->isNotEmpty()) {
-            $chunks = $chunks->rerank(
-                by: 'content',
-                query: $searchQuery,
-                limit: 3
-            );
+            $chunks = $chunks->take(3);
         }
 
         // 3. Construct context block for the RAG agent
