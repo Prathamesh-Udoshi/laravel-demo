@@ -77,10 +77,20 @@
                                 </p>
                             </div>
 
-                            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                                <a href="{{ route('courses.show', $course->id) }}" class="btn" style="padding: 0.75rem 1.5rem; width: 100%; text-align: center;">
+                            <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; gap: 0.75rem; width: 100%;">
+                                <a href="{{ route('courses.show', $course->id) }}" class="btn" style="padding: 0.75rem 1.5rem; flex-grow: 1; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
                                     Open Workspace Dashboard
                                 </a>
+                                <form action="{{ route('courses.destroy', $course->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course and all its contents?');" style="display: inline-flex;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger" style="padding: 0.75rem 1rem; display: inline-flex; align-items: center; justify-content: center; height: 100%;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>

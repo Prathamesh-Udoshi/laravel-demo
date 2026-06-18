@@ -45,6 +45,7 @@ Route::prefix('courses')->group(function () {
     Route::post('/{id}/process-week/{week}', [CourseController::class, 'processWeek'])->name('courses.process-week');
     Route::post('/{id}/generate-evaluation', [CourseController::class, 'generateEvaluation'])->name('courses.generate-evaluation');
     Route::get('/{id}/export', [CourseController::class, 'exportCourse'])->name('courses.export');
+    Route::delete('/{id}', [CourseController::class, 'destroy'])->name('courses.destroy');
 });
 
 // AI Viva Voce Routes

@@ -314,3 +314,16 @@ textarea ~ .timer-badge {
         opacity: 1;
     }
 }
+
+/* Custom Danger Outline Button */
+.btn-outline-danger {
+    background: #ffffff !important;
+    border: 2px solid #ef4444 !important;
+    color: #ef4444 !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-outline-danger:hover {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+}

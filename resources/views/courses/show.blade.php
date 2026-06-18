@@ -30,7 +30,7 @@
                 </svg>
                 Start AI Voice Viva
             </a>
-            <a href="{{ route('courses.export', $course->id) }}" class="btn" style="background: var(--bg-main); border: 2px solid var(--border); color: var(--text-main); padding: 0.75rem 1.5rem;">
+            <a href="{{ route('courses.export', $course->id) }}" class="btn" style="background: var(--bg-main); border: 2px solid var(--border); color: var(--text-main); padding: 0.75rem 1.5rem; text-decoration: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem; vertical-align: middle;">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                     <polyline points="7 10 12 15 17 10"></polyline>
@@ -38,6 +38,17 @@
                 </svg>
                 Export Course package (JSON)
             </a>
+            <form action="{{ route('courses.destroy', $course->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course and all its contents?');" style="display: inline-flex;">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-outline-danger" style="padding: 0.75rem 1.5rem; display: inline-flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem; vertical-align: middle;">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                    Delete Course
+                </button>
+            </form>
         </div>
     </div>
 

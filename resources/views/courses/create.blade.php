@@ -48,7 +48,7 @@
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                    <label style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem; display: block;">YouTube Playlist URL (Optional)</label>
+                    <label style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); margin-bottom: 0.5rem; display: block;">YouTube Playlist URL</label>
                     <input type="url" name="youtube_playlist_url" placeholder="e.g., https://www.youtube.com/playlist?list=..." value="{{ old('youtube_playlist_url') }}">
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.4;">
                         💡 <strong>Highly Recommended:</strong> Paste an NPTEL or YouTube course playlist URL. The system will parse all lectures in sequence, auto-populate week titles, and link the video players instantly!
