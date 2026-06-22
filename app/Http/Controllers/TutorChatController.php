@@ -25,7 +25,7 @@ class TutorChatController extends Controller
     /**
      * Handle the chat interaction.
      */
-    public function chat(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
+        public function chat(Request $request): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         @set_time_limit(0);
 
@@ -33,11 +33,17 @@ class TutorChatController extends Controller
             'message' => 'required|string',
             'course_id' => 'nullable|integer',
             'conversation_id' => 'nullable|string',
+            'ai_mode' => 'nullable|string|in:api,local',
         ]);
 
         $question = $request->input('message');
         $courseId = $request->input('course_id');
         $conversationId = $request->input('conversation_id');
+        $aiMode = $request->input('ai_mode', 'api');
+
+        // Determine AI provider & model dynamically based on toggle
+        $provider = $aiMode === 'local' ? 'ollama' : 'groq';
+        $model = $aiMode === 'local' ? env('OLLAMA_MODEL', 'llama3.2:1b') : null;
 
         $searchQuery = $question;
 
@@ -63,7 +69,9 @@ class TutorChatController extends Controller
                     );
 
                     $condensedResult = $condenser->prompt(
-                        "CONVERSATION HISTORY:\n{$historyText}\n\nFOLLOW-UP QUESTION: {$question}\n\nSTANDALONE SEARCH QUERY:"
+                        prompt: "CONVERSATION HISTORY:\n{$historyText}\n\nFOLLOW-UP QUESTION: {$question}\n\nSTANDALONE SEARCH QUERY:",
+                        provider: $provider,
+                        model: $model
                     );
 
                     $optimizedText = trim($condensedResult->text);
@@ -112,12 +120,22 @@ class TutorChatController extends Controller
         $agent->setLectureContext($context);
 
         $streamable = $conversationId 
-            ? $agent->continue($conversationId, as: $user)->stream($question)
-            : $agent->forUser($user)->stream($question);
+            ? $agent->continue($conversationId, as: $user)->stream($question, provider: $provider, model: $model)
+            : $agent->forUser($user)->stream($question, provider: $provider, model: $model);
 
         return response()->stream(function () use ($streamable, $chunks) {
-            if (ob_get_level() > 0) {
-                ob_flush();
+            // Disable zlib output compression to ensure immediate flushing
+            @ini_set('zlib.output_compression', 0);
+            if (function_exists('apache_setenv')) {
+                @apache_setenv('no-gzip', 1);
+            }
+
+            // Enable implicit flushing
+            @ob_implicit_flush(true);
+
+            // Flush and turn off all active output buffering layers
+            while (ob_get_level() > 0) {
+                ob_end_flush();
             }
             flush();
 
@@ -133,9 +151,6 @@ class TutorChatController extends Controller
                     'similarity' => isset($c->similarity) ? round($c->similarity, 3) : 'SQL Search',
                 ])->toArray()
             ]) . "\n\n";
-
-            if (ob_get_level() > 0) ob_flush();
-            flush();
 
             // Stream text delta tokens
             foreach ($streamable as $event) {

@@ -117,6 +117,17 @@ return [
             'driver' => 'ollama',
             'key' => env('OLLAMA_API_KEY', ''),
             'url' => env('OLLAMA_URL', 'http://localhost:11434'),
+            'models' => [
+                'text' => [
+                    'default' => env('OLLAMA_MODEL', 'llama3.2:1b'),
+                    'cheapest' => env('OLLAMA_MODEL', 'llama3.2:1b'),
+                    'smartest' => env('OLLAMA_MODEL', 'llama3.2:1b'),
+                ],
+                'embeddings' => [
+                    'default' => 'nomic-embed-text',
+                    'dimensions' => 768,
+                ],
+            ],
         ],
 
         'openai' => [
