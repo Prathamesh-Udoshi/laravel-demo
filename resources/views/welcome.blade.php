@@ -152,11 +152,11 @@
                 </h3>
                 
                 <p style="color: var(--text-muted); font-size: 0.975rem; line-height: 1.6; margin-bottom: 2rem; flex-grow: 1;">
-                    Query course lecture notes, video transcripts, and summaries semantically using dynamic vector embeddings. Ask questions in natural language and get replies backed by matching class material segments.
+                    Query course lecture notes, video transcripts, and summaries semantically using dynamic vector embeddings. Ask questions in natural language and get replies backed by matching class material segments. Supports toggling between Cloud API and local Ollama execution models.
                 </p>
 
                 <div style="padding: 0.85rem 1.25rem; background: #f8fafc; border-left: 3px solid var(--primary); font-size: 0.85rem; font-family: monospace; color: #475569; margin-bottom: 2rem;">
-                    <strong>API Tech:</strong> Gemini Embeddings • Cosine Similarity Fallback • AI Conversational Agent
+                    <strong>API Tech:</strong> Gemini Embeddings • Cosine Similarity Fallback • Groq Cloud & Local Ollama Toggle
                 </div>
                 
                 <a href="/tutor" class="btn" style="width: 100%; padding: 0.85rem 1.5rem; display: flex; justify-content: center; gap: 0.5rem; background: var(--text-main); font-size: 0.95rem;">

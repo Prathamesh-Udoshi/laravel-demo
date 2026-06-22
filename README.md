@@ -40,6 +40,7 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
 ### 7. Interactive AI Lecture Tutor (RAG)
 An experiment in Retrieval-Augmented Generation (RAG) and local semantic search using Laravel 13 vector integrations.
 * **What it does**: Allows students to ask questions about courses in the Course Planner. **This works exclusively for courses dynamically created and processed in the Course Planner (`/courses`).** The system segments lecture transcripts into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
+* **Local Ollama Integration**: Supports toggling between Cloud API (Groq/Gemini fallback) and a locally running LLM via Ollama (such as `llama3.2:1b`, or `qwen2.5:0.5b` for 8GB RAM CPU-only setups). The search query embeddings continue to run on the Gemini API to preserve existing 3072-dimensional vector cache stores, while completion logic runs on the local CPU to save API generation costs.
 * **Vector Fallback Engine**: If pgvector extension is not installed (common on local Windows setups), the system catches the query exception and dynamically falls back to computing cosine similarity mathematically inside PHP, keeping search fully functional.
 * **Where to find it**: Access it at `/tutor` (configured via [TutorChatController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TutorChatController.php) and routes in `routes/web.php`).
 
@@ -99,3 +100,20 @@ An experiment in generating highly personalized completion reminders using datab
    npm run dev
    ```
    *(If you run your server through Laravel Herd, the app is instantly available at http://myapp.test/courses)*
+
+6. **Running AI Tutor Completions Locally (Ollama Optional Setup)**:
+    To run the tutor response completion locally without cloud API fees:
+    * Download and install Ollama from [Ollama.com](https://ollama.com).
+    * Pull a lightweight completion model of your choice in Command Prompt / PowerShell:
+      ```bash
+      # For standard CPU/8GB RAM setups (recommended)
+      ollama pull llama3.2:1b
+      # For ultra-lightweight CPU execution
+      ollama pull qwen2.5:0.5b
+      ```
+    * Append the following variables to your `.env` configuration file:
+      ```env
+      OLLAMA_MODEL=llama3.2:1b
+      OLLAMA_URL=http://localhost:11434
+      ```
+    * Navigate to `/tutor` and switch the toggle button in the chat header card from **Cloud API** to **Local (Ollama)**.
