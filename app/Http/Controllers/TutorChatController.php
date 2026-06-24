@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\WeeklyContentChunk;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class TutorChatController extends Controller
@@ -134,8 +135,10 @@ class TutorChatController extends Controller
             @ob_implicit_flush(true);
 
             // Flush and turn off all active output buffering layers
-            while (ob_get_level() > 0) {
-                ob_end_flush();
+            if (!app()->runningUnitTests()) {
+                while (ob_get_level() > 0) {
+                    ob_end_flush();
+                }
             }
             flush();
 
@@ -177,7 +180,7 @@ class TutorChatController extends Controller
     /**
      * Synthesize text to speech dynamically without saving files.
      */
-    public function speak(Request $request): \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+    public function speak(Request $request): Response|JsonResponse
     {
         $request->validate([
             'text' => 'required|string',
