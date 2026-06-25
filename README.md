@@ -10,7 +10,7 @@ Here are the independent modules implemented in this playground:
 
 ### 1. Course Assessment Planner
 An experiment in combining YouTube content scraping with LLM generation to draft academic syllabus structures and test materials.
-* **What it does**: Takes a YouTube playlist URL, distributes the videos across a 4, 8, or 12-week course, grabs transcripts from YouTube, and uses AI (Groq/Gemini fallbacks) to write syllabus summaries. It then auto-generates 10-question MCQ quizzes and subjective homework tasks.
+* **What it does**: Takes a YouTube playlist URL, distributes the videos across a 4, 8, or 12-week course, and uses OpenAI's cheapest model (gpt-4o-mini) to generate syllabus summaries directly based on video titles. It then auto-generates 10-question MCQ quizzes and subjective homework tasks.
 * **Where to find it**: Access it at `/courses` (configured in `routes/web.php` via [CourseController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/CourseController.php)).
 
 ### 2. AI Viva Voce (Oral Exam Evaluator)
@@ -39,8 +39,8 @@ An exploration of the Model Context Protocol to let AI agents execute actions lo
 
 ### 7. Interactive AI Lecture Tutor (RAG)
 An experiment in Retrieval-Augmented Generation (RAG) and local semantic search using Laravel 13 vector integrations.
-* **What it does**: Allows students to ask questions about courses in the Course Planner. **This works exclusively for courses dynamically created and processed in the Course Planner (`/courses`).** The system segments lecture transcripts into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
-* **Local Ollama Integration**: Supports toggling between Cloud API (Groq/Gemini fallback) and a locally running LLM via Ollama (such as `llama3.2:1b`, or `qwen2.5:0.5b` for 8GB RAM CPU-only setups). The search query embeddings continue to run on the Gemini API to preserve existing 3072-dimensional vector cache stores, while completion logic runs on the local CPU to save API generation costs.
+* **What it does**: Allows students to ask questions about courses in the Course Planner. **This works exclusively for courses dynamically created and processed in the Course Planner (`/courses`).** The system segments weekly summaries into overlapping chunks, generates 3072-dimensional Gemini embeddings on-the-fly, and performs a semantic search. The AI Agent (`LectureTutor`) is strictly instructed to only answer using retrieved context, politely declining off-topic queries.
+* **Local Ollama Integration**: Supports toggling between Cloud API (OpenAI gpt-4o-mini) and a locally running LLM via Ollama (such as `qwen2.5:1.5b` or `qwen2.5:0.5b`). The search query embeddings continue to run on the Gemini API to preserve existing 3072-dimensional vector cache stores, while completion logic runs on the local CPU to save API generation costs. The local tutor includes a semantic interceptor to gracefully reject off-topic questions without wasting local resources.
 * **Vector Fallback Engine**: If pgvector extension is not installed (common on local Windows setups), the system catches the query exception and dynamically falls back to computing cosine similarity mathematically inside PHP, keeping search fully functional.
 * **Where to find it**: Access it at `/tutor` (configured via [TutorChatController](file:///c:/Users/Prathamesh/Herd/myapp/app/Http/Controllers/TutorChatController.php) and routes in `routes/web.php`).
 
@@ -61,7 +61,7 @@ An experiment in generating highly personalized completion reminders using datab
 * **Framework**: Laravel 13 (PHP ^8.3)
 * **Database**: PostgreSQL (with optional `pgvector` extension; fallbacks to native PHP cosine similarity logic if missing)
 * **Frontend**: Blade templates, Vanilla CSS (harmonious light mode styling), CSS micro-animations, real-time RAG context inspector
-* **AI Orchestration**: Custom multi-model failover logic in [AIService](file:///c:/Users/Prathamesh/Herd/myapp/app/Support/AIService.php) calling Groq Cloud (Llama & Whisper for Speech-to-Text) and Google Gemini APIs. Vectorization and RAG conversation memory managed via the `laravel/ai` SDK.
+* **AI Orchestration**: Integrates OpenAI's gpt-4o-mini for direct title-based summarization, along with Groq (Whisper/Llama) and Gemini failover APIs for quizzes, assignments, and oral exam (Viva Voce) evaluations. Vectorization and RAG conversation memory managed via the `laravel/ai` SDK.
 * **Testing & Tools**: Pest PHP, Laravel Pail, Laravel Tinker, Laravel MCP.
 
 ---
@@ -86,7 +86,7 @@ An experiment in generating highly personalized completion reminders using datab
    composer run setup
    ```
 
-4. **Vectorize Transcripts and Process Background Jobs**:
+4. **Vectorize Weekly Summaries and Process Background Jobs**:
    By default, the Course Planner chunks and generates vector embeddings **synchronously on-the-fly** during week-processing requests (via `ChunkWeeklyContentJob::dispatchSync`). This ensures that vector chunks are immediately indexed in the database and available to the RAG Tutor dashboard without requiring a running queue worker.
    
    If you have legacy courses or need to force-regenerate vector chunks for all existing course materials at once, you can run the console command:

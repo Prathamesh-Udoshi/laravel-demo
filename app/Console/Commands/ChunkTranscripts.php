@@ -20,7 +20,7 @@ class ChunkTranscripts extends Command
      *
      * @var string
      */
-    protected $description = 'Chunk and generate vector embeddings for all existing weekly lesson transcripts and summaries.';
+    protected $description = 'Chunk and generate vector embeddings for all existing weekly lesson summaries.';
 
     /**
      * Execute the console command.
@@ -55,6 +55,6 @@ class ChunkTranscripts extends Command
 
         $progressBar->finish();
         $this->newLine();
-        $this->info('Completed chunking and vectorizing all transcripts!');
+        $this->info('Completed chunking and vectorizing all summaries!');
     }
 }
