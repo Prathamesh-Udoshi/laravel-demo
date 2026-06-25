@@ -18,33 +18,18 @@ class AIService
     /**
      * Summarize a single weekly transcript or generate an NPTEL-style curriculum summary if rate-limited.
      */
-    public function summarizeWeek($weekNumber, $lectureTitle, $transcript, $courseTitle = null)
+    public function summarizeWeek($weekNumber, $lectureTitle, $courseTitle = null)
     {
         $courseContext = $courseTitle ? " for the course '{$courseTitle}'" : "";
 
-        if (empty($transcript)) {
-            $prompt = "You are a senior university professor and expert curriculum designer for Visvesvaraya Technological University (VTU) and NPTEL.
-            I need a highly detailed, academically rigorous summary of this specific lecture: 'Week {$weekNumber} - {$lectureTitle}'{$courseContext}.
-            
-            Based on your extensive knowledge of standard university curricula for this subject, write a dense summary containing 3-4 professional bullet points detailing the core concepts, algorithms, frameworks, or models that are standardly taught in this specific lecture{$courseContext}.
-            
-            Do NOT mention that a transcript was missing or that this is a placeholder. Write it as a definitive, high-fidelity lecture syllabus summary. Keep it highly educational and under 150 words.";
-            
-            return $this->callLLM($prompt, "You are a professional university professor designing syllabus summaries.");
-        }
-
-        // Limit transcript length to avoid blowing up tokens
-        $trimmedTranscript = substr($transcript, 0, 15000);
-
-        $prompt = "You are an expert academic curriculum summarizer. Summarize the following lecture transcript into 3-4 dense, highly educational bullet points detailing the key concepts, algorithms, or theories taught. 
-        Lecture Title: Week {$weekNumber} - {$lectureTitle}{$courseContext}
+        $prompt = "You are a senior university professor and expert curriculum designer for Visvesvaraya Technological University (VTU) and NPTEL.
+        I need a highly detailed, academically rigorous summary of this specific lecture: 'Week {$weekNumber} - {$lectureTitle}'{$courseContext}.
         
-        Transcript:
-        {$trimmedTranscript}
+        Based on your extensive knowledge of standard university curricula for this subject, write a dense summary containing 3-4 professional bullet points detailing the core concepts, algorithms, frameworks, or models that are standardly taught in this specific lecture{$courseContext}.
         
-        Return ONLY the summary bullet points. Keep it under 200 words.";
-
-        return $this->callLLM($prompt, "You are a concise academic assistant.");
+        Write it as a definitive, high-fidelity lecture syllabus summary. Keep it highly educational and under 150 words. Return ONLY the summary bullet points.";
+        
+        return $this->callOpenAI($prompt, "You are a professional university professor designing syllabus summaries.");
     }
 
     /**
@@ -261,6 +246,52 @@ class AIService
             $string = substr($string, 0, -3);
         }
         return trim($string);
+    }
+
+    /**
+     * Call OpenAI API using the cheapest model (gpt-4o-mini).
+     */
+    private function callOpenAI($prompt, $system, $isJson = false, $temperature = 0.7)
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        if (empty($apiKey)) {
+            Log::error("OpenAI API key is missing. Please check your .env file.");
+            throw new \Exception("OpenAI API key is missing. Please configure it in your .env file.");
+        }
+
+        try {
+            $body = [
+                'model' => 'gpt-4o-mini',
+                'messages' => [
+                    ['role' => 'system', 'content' => $system],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'max_tokens' => 1500,
+                'temperature' => $temperature,
+            ];
+
+            if ($isJson) {
+                $body['response_format'] = ['type' => 'json_object'];
+            }
+
+            $res = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type' => 'application/json',
+            ])->timeout(15)->post('https://api.openai.com/v1/chat/completions', $body);
+
+            if ($res->successful()) {
+                $content = $res->json('choices.0.message.content');
+                if ($content) {
+                    return trim($content);
+                }
+            }
+
+            Log::error("OpenAI API failed: " . $res->body());
+            throw new \Exception("OpenAI API error: " . $res->status() . " " . $res->body());
+        } catch (\Exception $e) {
+            Log::error("OpenAI Exception: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**

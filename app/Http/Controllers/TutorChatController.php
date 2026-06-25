@@ -43,8 +43,8 @@ class TutorChatController extends Controller
         $aiMode = $request->input('ai_mode', 'api');
 
         // Determine AI provider & model dynamically based on toggle
-        $provider = $aiMode === 'local' ? 'ollama' : 'groq';
-        $model = $aiMode === 'local' ? env('OLLAMA_MODEL', 'llama3.2:1b') : null;
+        $provider = $aiMode === 'local' ? 'ollama' : 'openai';
+        $model = $aiMode === 'local' ? env('OLLAMA_MODEL', 'qwen2.5:1.5b') : 'gpt-4o-mini';
 
         $searchQuery = $question;
 
@@ -93,6 +93,37 @@ class TutorChatController extends Controller
             courseId: $courseId
         );
 
+        // Intercept off-topic questions in local mode when no context is found
+        $isGreeting = preg_match('/^(hello|hi|hey|greetings|good morning|good afternoon|good evening|yo)(\b|\s|$)/i', trim($question));
+        if ($chunks->isEmpty() && !$isGreeting && $aiMode === 'local') {
+            return response()->stream(function () {
+                @ini_set('zlib.output_compression', 0);
+                @ob_implicit_flush(true);
+                if (!app()->runningUnitTests()) {
+                    while (ob_get_level() > 0) ob_end_flush();
+                }
+                flush();
+
+                echo "data: " . json_encode([
+                    'type' => 'metadata',
+                    'conversation_id' => 'no-context',
+                    'context_used' => []
+                ]) . "\n\n";
+
+                echo "data: " . json_encode([
+                    'type' => 'text_delta',
+                    'text' => "I am only authorized to answer questions directly related to your courses."
+                ]) . "\n\n";
+
+                echo "data: [DONE]\n\n";
+            }, 200, [
+                'Content-Type' => 'text/event-stream',
+                'Cache-Control' => 'no-cache',
+                'Connection' => 'keep-alive',
+                'X-Accel-Buffering' => 'no',
+            ]);
+        }
+
         // 2. Extract the top 3 most relevant context blocks directly (Gemini 3072-dim embeddings are highly accurate)
         if ($chunks->isNotEmpty()) {
             $chunks = $chunks->take(3);
@@ -119,6 +150,7 @@ class TutorChatController extends Controller
         // 5. Invoke the AI Tutor Agent with the contextual transcript notes
         $agent = new LectureTutor();
         $agent->setLectureContext($context);
+        $agent->setIsLocal($aiMode === 'local');
 
         $streamable = $conversationId 
             ? $agent->continue($conversationId, as: $user)->stream($question, provider: $provider, model: $model)
@@ -155,17 +187,33 @@ class TutorChatController extends Controller
                 ])->toArray()
             ]) . "\n\n";
 
-            // Stream text delta tokens
-            foreach ($streamable as $event) {
-                if ($event->type() === 'text_delta') {
-                    echo "data: " . json_encode([
-                        'type' => 'text_delta',
-                        'text' => $event->delta
-                    ]) . "\n\n";
+            try {
+                // Stream text delta tokens
+                foreach ($streamable as $event) {
+                    if ($event->type() === 'text_delta') {
+                        echo "data: " . json_encode([
+                            'type' => 'text_delta',
+                            'text' => $event->delta
+                        ]) . "\n\n";
 
-                    if (ob_get_level() > 0) ob_flush();
-                    flush();
+                        if (ob_get_level() > 0) ob_flush();
+                        flush();
+                    }
                 }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Tutor Stream Error: " . $e->getMessage(), ['exception' => $e]);
+
+                $errorMsg = $e->getMessage();
+                if ($e instanceof \Illuminate\Http\Client\RequestException) {
+                    $errorMsg .= " | Details: " . $e->response->body();
+                }
+
+                echo "data: " . json_encode([
+                    'type' => 'text_delta',
+                    'text' => "\n\n⚠️ **Error communicating with AI Service:**\n" . $errorMsg
+                ]) . "\n\n";
+                if (ob_get_level() > 0) ob_flush();
+                flush();
             }
 
             echo "data: [DONE]\n\n";

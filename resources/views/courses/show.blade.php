@@ -131,7 +131,7 @@
                         <div style="text-align: center; padding: 3rem 1.5rem; border: 2px dashed var(--border); background: #f8fafc;">
                             <h4 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 700;">No Mid-Term Assessments Generated</h4>
                             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; max-width: 450px; margin-left: auto; margin-right: auto;">
-                                Press the button below to fetch all week transcripts sequentially and run the zero-compute AI planner to build your Mid-Term Quiz and Assignment package.
+                                Press the button below to analyze all week titles and generate your Mid-Term Quiz and Assignment package.
                             </p>
                             <button onclick="triggerGeneration('midterm', {{ json_encode($course->weeklyContents->pluck('week_number')->unique()->take(ceil($course->duration_weeks / 2))->values()) }})" class="btn" style="background: linear-gradient(135deg, var(--primary), var(--accent));">
                                 Generate Mid-Term Assessments
@@ -225,7 +225,7 @@
                         <div style="text-align: center; padding: 3rem 1.5rem; border: 2px dashed var(--border); background: #f8fafc;">
                             <h4 style="font-size: 1.2rem; color: var(--text-main); margin-bottom: 0.5rem; font-weight: 700;">No End-Term Assessments Generated</h4>
                             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; max-width: 450px; margin-left: auto; margin-right: auto;">
-                                Press the button below to fetch all week transcripts sequentially and run the zero-compute AI planner to build your cumulative End-Term assessments.
+                                Press the button below to analyze all week titles and generate your cumulative End-Term assessments.
                             </p>
                             <button onclick="triggerGeneration('final', {{ json_encode($course->weeklyContents->pluck('week_number')->unique()->slice(ceil($course->duration_weeks / 2))->values()) }})" class="btn" style="background: linear-gradient(135deg, var(--accent), var(--primary));">
                                 Generate End-Term Assessments
@@ -321,7 +321,7 @@
             </div>
 
             <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.4; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
-                Fetching pre-transcribed transcripts sequentially from YouTube and extracting weekly core lecture concepts. This consumes 0% local server compute.
+                Analyzing lecture titles and generating weekly curriculum summaries using OpenAI. This runs on the high-efficiency OpenAI gpt-4o-mini engine.
             </p>
 
             <div id="ai-status-list" style="background: #f8fafc; border: 1px solid var(--border); padding: 1.5rem; font-family: monospace; font-size: 0.85rem; color: var(--text-main); overflow-y: auto; flex-grow: 1; min-height: 150px; line-height: 1.6;">

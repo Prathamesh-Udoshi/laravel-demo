@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('video_title');
             $table->string('youtube_url')->nullable();
             $table->text('summary')->nullable();
-            $table->longText('transcript_or_notes')->nullable();
             $table->timestamps();
         });
     }

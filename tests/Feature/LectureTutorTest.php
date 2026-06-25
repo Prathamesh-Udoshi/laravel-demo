@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
-test('weekly content transcript chunking works on save', function () {
+test('weekly content summary chunking works on save', function () {
     // Fake embeddings API
     Embeddings::fake();
 
@@ -21,15 +21,14 @@ test('weekly content transcript chunking works on save', function () {
         'duration_weeks' => 1,
     ]);
 
-    // Create weekly content with long notes to trigger chunking
+    // Create weekly content with long summary to trigger chunking
     $longText = str_repeat('This is a test sentence that is repeated to verify chunking. ', 30); // ~1800 chars
     
     $content = WeeklyContent::create([
         'course_id' => $course->id,
         'week_number' => 1,
         'video_title' => 'Introduction to PHPUnit',
-        'summary' => 'Short summary',
-        'transcript_or_notes' => $longText,
+        'summary' => $longText,
     ]);
 
     // Wait, the observer dispatches a job. Under sync connection, it executes immediately.
@@ -76,7 +75,7 @@ test('fallback similarity search returns closest chunks on unsupported databases
             'course_id' => $course->id,
             'week_number' => 1,
             'video_title' => 'Eloquent Model',
-            'transcript_or_notes' => 'Eloquent is an ActiveRecord ORM in Laravel.',
+            'summary' => 'Eloquent is an ActiveRecord ORM in Laravel.',
         ]);
     });
 
@@ -147,7 +146,7 @@ test('tutor chat endpoint returns successfully with reranking', function () {
         'course_id' => $course->id,
         'week_number' => 1,
         'video_title' => 'Eloquent Model',
-        'transcript_or_notes' => 'Eloquent is an ActiveRecord ORM in Laravel.',
+        'summary' => 'Eloquent is an ActiveRecord ORM in Laravel.',
     ]));
 
     $chunk = WeeklyContentChunk::create([

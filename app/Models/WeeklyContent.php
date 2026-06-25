@@ -17,7 +17,6 @@ class WeeklyContent extends Model
         'video_title',
         'youtube_url',
         'summary',
-        'transcript_or_notes',
     ];
 
     /**

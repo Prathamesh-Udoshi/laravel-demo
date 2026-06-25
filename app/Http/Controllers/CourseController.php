@@ -78,7 +78,6 @@ class CourseController extends Controller
                         'video_title' => $videoData['title'],
                         'youtube_url' => $videoData['url'],
                         'summary' => null,
-                        'transcript_or_notes' => null,
                     ]);
                 }
             } else {
@@ -89,7 +88,6 @@ class CourseController extends Controller
                         'video_title' => "Lecture {$w} Placeholder",
                         'youtube_url' => null,
                         'summary' => null,
-                        'transcript_or_notes' => null,
                     ]);
                 }
             }
@@ -129,7 +127,7 @@ class CourseController extends Controller
     {
         @set_time_limit(0);
         try {
-            $lectures = WeeklyContent::where('course_id', $courseId)->where('week_number', $weekNumber)->get();
+            $lectures = WeeklyContent::where('course_id', $courseId)->where('week_number', $weekNumber)->orderBy('id', 'asc')->get();
 
             if ($lectures->isEmpty()) {
                 return response()->json([
@@ -139,29 +137,16 @@ class CourseController extends Controller
             }
 
             foreach ($lectures as $lecture) {
-                // Skip already summarized lectures, unless they are the old placeholder message
-                if (!empty($lecture->summary) && !str_contains($lecture->summary, 'No transcripts were available')) {
+                // Skip already summarized lectures
+                if (!empty($lecture->summary)) {
                     continue;
                 }
 
-                $transcript = null;
-                if (!empty($lecture->youtube_url)) {
-                    // Extract video ID from youtube url
-                    parse_str(parse_url($lecture->youtube_url, PHP_URL_QUERY), $queries);
-                    $videoId = $queries['v'] ?? null;
-                    
-                    if ($videoId) {
-                        $transcript = $this->youtubeService->fetchVideoTranscript($videoId);
-                    }
-                }
-
-                // Fallback summary generation if transcript is null
                 $courseTitle = $lecture->course->title ?? null;
-                $summary = $this->aiService->summarizeWeek($weekNumber, $lecture->video_title, $transcript, $courseTitle);
+                $summary = $this->aiService->summarizeWeek($weekNumber, $lecture->video_title, $courseTitle);
 
                 $lecture->update([
                     'summary' => $summary,
-                    'transcript_or_notes' => $transcript
                 ]);
             }
 
@@ -197,10 +182,14 @@ class CourseController extends Controller
         if ($type === 'midterm') {
             $weeks = WeeklyContent::where('course_id', $courseId)
                 ->whereBetween('week_number', [1, $halfWeeks])
+                ->orderBy('week_number', 'asc')
+                ->orderBy('id', 'asc')
                 ->get();
         } else {
             $weeks = WeeklyContent::where('course_id', $courseId)
                 ->whereBetween('week_number', [$halfWeeks + 1, $totalWeeks])
+                ->orderBy('week_number', 'asc')
+                ->orderBy('id', 'asc')
                 ->get();
         }
 

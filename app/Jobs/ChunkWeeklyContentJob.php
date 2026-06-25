@@ -30,8 +30,8 @@ class ChunkWeeklyContentJob implements ShouldQueue
         // 1. Delete existing chunks
         $this->weeklyContent->chunks()->delete();
 
-        // 2. Determine text source to chunk (transcript_or_notes first, then summary)
-        $textToChunk = $this->weeklyContent->transcript_or_notes ?: $this->weeklyContent->summary;
+        // 2. Determine text source to chunk (summary)
+        $textToChunk = $this->weeklyContent->summary;
 
         if (empty(trim($textToChunk))) {
             return;

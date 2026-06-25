@@ -21,7 +21,7 @@ class Course extends Model
      */
     public function weeklyContents()
     {
-        return $this->hasMany(WeeklyContent::class)->orderBy('week_number', 'asc');
+        return $this->hasMany(WeeklyContent::class)->orderBy('week_number', 'asc')->orderBy('id', 'asc');
     }
 
     /**
